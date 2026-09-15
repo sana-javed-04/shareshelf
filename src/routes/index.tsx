@@ -1,0 +1,223 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "motion/react";
+import { ArrowRight, HandHeart, Lock, MapPin, MessageSquare, Recycle, ShieldCheck, Tag } from "lucide-react";
+import { SiteLayout } from "@/components/SiteLayout";
+import { Button } from "@/components/ui/button";
+import { ItemCard } from "@/components/ItemCard";
+import { ItemGridSkeleton } from "@/components/LoadingSkeleton";
+import { itemService } from "@/services/itemService";
+import { EmptyState } from "@/components/EmptyState";
+
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "ShareShelf — Rent, donate and resell with your neighbours" },
+      {
+        name: "description",
+        content:
+          "Borrow a drill for the weekend, donate the books you've outgrown, resell what you no longer need. Hyper-local, privacy-first, no phone numbers shared.",
+      },
+      { property: "og:title", content: "ShareShelf — Your neighbourhood's shared shelf" },
+      {
+        property: "og:description",
+        content:
+          "A privacy-first hyper-local marketplace for renting, donating and reselling items within your community.",
+      },
+    ],
+  }),
+  component: Home,
+});
+
+const STEPS = [
+  {
+    icon: Tag,
+    title: "List it in a minute",
+    body: "Add a photo, pick rent, donate or sell, and drop a pin on your approximate area — never your exact address.",
+  },
+  {
+    icon: MessageSquare,
+    title: "Chat inside ShareShelf",
+    body: "Neighbours message you through in-app chat. No phone numbers, no emails, no social handles required.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Hand over with a PIN",
+    body: "Approve a request and a one-time pickup PIN is generated. Verify it at handover so every exchange is confirmed.",
+  },
+  {
+    icon: Recycle,
+    title: "Return and close the loop",
+    body: "Mark returns complete, build your transaction history, and keep good items circulating locally.",
+  },
+];
+
+const VALUES = [
+  { icon: Lock, title: "Privacy by default", body: "Contact details are never exposed. Chat stays in-app." },
+  { icon: MapPin, title: "Approximate locations", body: "Coordinates are coarsened before anyone sees them." },
+  { icon: HandHeart, title: "Community-first", body: "Donations sit beside rentals — generosity is the default." },
+];
+
+function Home() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["items", "featured"],
+    queryFn: () => itemService.list({ page_size: 6, sort: "newest" }),
+  });
+
+  return (
+    <SiteLayout className="pt-0" >
+      <section className="relative -mx-4 -mt-10 overflow-hidden px-4 pb-20 pt-16 sm:-mx-6 sm:px-6 sm:pt-24">
+        <div className="hero-glow pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <span className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur">
+              <Lock className="size-3.5 text-primary" aria-hidden="true" />
+              Privacy-preserving · Hyper-local
+            </span>
+            <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
+              Your neighbourhood already owns{" "}
+              <span className="text-primary">everything you need.</span>
+            </h1>
+            <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+              ShareShelf lets people in the same street, campus or town rent, donate and resell things to each
+              other — without ever handing over a phone number or an exact address.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button asChild size="lg">
+                <Link to="/browse">
+                  Browse nearby items
+                  <ArrowRight className="ml-2 size-4" aria-hidden="true" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="secondary">
+                <Link to="/post-item">Post something</Link>
+              </Button>
+            </div>
+            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-6">
+              {[
+                { k: "3 ways", v: "Rent · Donate · Sell" },
+                { k: "0", v: "Phone numbers shared" },
+                { k: "1 km", v: "Location precision" },
+              ].map((s) => (
+                <div key={s.k}>
+                  <dt className="font-display text-2xl font-bold text-primary">{s.k}</dt>
+                  <dd className="text-xs text-muted-foreground">{s.v}</dd>
+                </div>
+              ))}
+            </dl>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="relative"
+          >
+            <div className="surface-gradient rounded-3xl border p-6 shadow-soft">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                On the shelf near you
+              </p>
+              <ul className="mt-4 space-y-3">
+                {[
+                  { t: "Cordless drill", s: "For rent · Rs 350/day", d: "0.6 km away" },
+                  { t: "Data structures textbooks", s: "Donation · Free", d: "1.2 km away" },
+                  { t: "Camping tent, 4-person", s: "For rent · Rs 900/day", d: "2.4 km away" },
+                  { t: "Study desk", s: "For sale · Rs 6,500", d: "3.1 km away" },
+                ].map((row) => (
+                  <li
+                    key={row.t}
+                    className="flex items-center justify-between gap-4 rounded-xl border bg-card/80 px-4 py-3 backdrop-blur"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold">{row.t}</span>
+                      <span className="block text-xs text-muted-foreground">{row.s}</span>
+                    </span>
+                    <span className="shrink-0 text-xs font-medium text-primary">{row.d}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section id="how-it-works" className="scroll-mt-24 py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">How ShareShelf works</h2>
+          <p className="mt-3 text-muted-foreground">
+            Four steps from “I need this for a weekend” to a confirmed, privacy-safe handover.
+          </p>
+        </div>
+        <ol className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((step, i) => (
+            <motion.li
+              key={step.title}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.35, delay: i * 0.06 }}
+              className="card-lift rounded-2xl border bg-card p-6"
+            >
+              <span className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary">
+                <step.icon className="size-5" aria-hidden="true" />
+              </span>
+              <h3 className="mt-4 text-base font-semibold">
+                {i + 1}. {step.title}
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">{step.body}</p>
+            </motion.li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="py-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="font-display text-3xl font-bold tracking-tight">Fresh on the shelf</h2>
+            <p className="mt-2 text-muted-foreground">The newest listings from members around you.</p>
+          </div>
+          <Button asChild variant="secondary">
+            <Link to="/browse">See all listings</Link>
+          </Button>
+        </div>
+        <div className="mt-8">
+          {isLoading ? (
+            <ItemGridSkeleton count={6} />
+          ) : data && data.results.length > 0 ? (
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {data.results.map((item) => (
+                <ItemCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="No listings yet"
+              description="Be the first to put something on the shelf for your community."
+              action={
+                <Button asChild>
+                  <Link to="/post-item">Post an item</Link>
+                </Button>
+              }
+            />
+          )}
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="surface-gradient grid gap-8 rounded-3xl border p-8 sm:p-12 lg:grid-cols-3">
+          {VALUES.map((v) => (
+            <div key={v.title}>
+              <v.icon className="size-6 text-primary" aria-hidden="true" />
+              <h3 className="mt-3 text-base font-semibold">{v.title}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{v.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </SiteLayout>
+  );
+}
