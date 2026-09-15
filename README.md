@@ -1,440 +1,131 @@
-ShareShelf
+# ShareShelf 🚀
 
-ShareShelf is a privacy-preserving, hyper-local platform for renting, donating, and selling second-hand items within local communities, residential areas, university campuses, towns, and cities.
+**ShareShelf** is a privacy-preserving, hyper-local platform designed for renting, donating, and selling second-hand items within local communities, residential areas, university campuses, towns, and cities.
 
-The platform helps people discover nearby resources, communicate through private in-app chat without exposing phone numbers, and complete physical handovers using a temporary 4-digit verification PIN.
+The platform allows users to discover nearby listings, communicate through private in-app messaging without exposing phone numbers, request items, and securely complete physical handovers using a temporary 4-digit pickup PIN.
 
-Repository Details
+---
 
-Recommended Repository Name
+## 🌟 Key Features
 
-Plain Text
+- **Item Transactions:** Rent, donate, or sell second-hand items seamlessly.
+- **Advanced Discovery:** Browse listings with robust search, filters, sorting, pagination, and radius-based location discovery.
+- **Dynamic Filters:** Filter items by listing type, category, condition, area, price, and precise distance.
+- **Geospatial Proximity:** Built-in maps using Leaflet and OpenStreetMap, calculating nearby listings via the Haversine formula.
+- **Privacy-First Messaging:** Secure, item-based private messaging without exposing users' physical contact numbers or email addresses.
+- **Secure Handovers:** Temporary 4-digit pickup PIN generation and verification at the time of physical item handover.
+- **State Management:** Lifecycle tracking for rentals, sales, donations, returns, and cancellations.
+- **Admin Moderation:** Dedicated admin dashboard to manage users, items, flags, reports, and ongoing transactions.
+- **Theme Support:** Fully responsive interface supporting Light, Dark, and System theme synchronization.
 
-shareshelf
+---
 
-Alternative names:
+## 🛠️ Technology Stack
 
-Plain Text
+### Frontend
 
-shareshelf-hyperlocal-marketplace
-shareshelf-fyp
-shareshelf-community-sharing-platform
+- **Framework:** React 19 & TypeScript
+- **Runtime & Build Tool:** Vite with TanStack Start configuration
+- **Routing:** TanStack Router (Type-safe routing)
+- **Data Fetching:** TanStack Query (React Query)
+- **Styling & Components:** Tailwind CSS v4, Radix UI primitives
+- **Animations:** Motion (Framer Motion)
+- **Maps:** Leaflet.js & OpenStreetMap
+- **Forms:** React Hook Form & Zod validation
 
-Short Description
+### Backend (Optional Standalone)
 
-Plain Text
+- **Framework:** Python FastAPI (RESTful APIs)
+- **Database ORM:** SQLAlchemy with PostgreSQL
+- **Migrations:** Alembic
+- **Authentication:** JWT (JSON Web Tokens) with `python-jose` and `passlib/bcrypt`
+- **Server:** Uvicorn
 
-A privacy-preserving hyper-local platform for renting, donating, and selling items nearby.
+---
 
-Long Description
+## 📂 Project Structure
 
-Plain Text
-
-ShareShelf is a full-stack community sharing platform that enables users to rent, donate, and sell second-hand items within nearby areas. It includes radius-based discovery using Leaflet, OpenStreetMap, and the Haversine formula; private in-app WebSocket chat; JWT authentication; item lifecycle management; 4-digit handover PIN verification; transaction tracking; reporting; and an administrator moderation panel.
-
-Suggested GitHub Topics
-
-Plain Text
-
-shareshelf
-final-year-project
-fyp
-fastapi
-react
-postgresql
-neon-tech
-sqlalchemy
-websocket
-leaflet
-openstreetmap
-hyperlocal-marketplace
-community-sharing
-circular-economy
-second-hand-marketplace
-
-Technology Stack
-
-Layer
-Technology
-Purpose
-Frontend
-React.js, TypeScript, Tailwind CSS
-Responsive and maintainable user interface
-Frontend routing
-React Router
-Page navigation and protected routes
-Animation
-Framer Motion
-Lightweight page transitions and micro-interactions
-Backend
-Python FastAPI
-REST APIs, authentication, transactions, and WebSockets
-ORM
-SQLAlchemy
-Connects Python models with PostgreSQL tables
-Database
-PostgreSQL via Neon.tech
-Stores users, listings, transactions, messages, and reports
-Authentication
-JWT and bcrypt/Passlib
-Secure login and protected access
-Real-time chat
-Native FastAPI WebSockets
-Private in-app messaging
-Maps
-Leaflet.js and OpenStreetMap
-Nearby item discovery and map markers
-Distance calculation
-Haversine formula
-Radius-based search in kilometers
-Migrations
-Alembic
-Database schema versioning
-Image handling
-FastAPI uploads directory
-Item image uploads and storage
-
-Core Features
-
-ShareShelf supports three listing modes: Rent, Donate, and Sell. Users can create listings with a title, description, category, condition, price, approximate location, and image.
-
-The platform provides discovery filters for listing type, category, condition, area, price, and distance. Users can search for items within 1 km, 5 km, 10 km, or 20 km using Leaflet, OpenStreetMap, and a backend Haversine distance calculation.
-
-Users can communicate privately through item-based WebSocket chat without sharing phone numbers. Owners can approve or reject requests, and approved transactions use a temporary 4-digit handover PIN. Rental items move through the states Available → Reserved → Rented → Returned → Available, while sold or donated items become unavailable after completion.
-
-Administrators can review reports, manage users, ban or unban accounts, moderate listings, and monitor transaction activity.
-
-Main User Workflow
-
-Plain Text
-
-Register
-→ Login
-→ Create or browse a listing
-→ Search by category, condition, area, or radius
-→ View item details
-→ Chat privately
-→ Request an item
-→ Owner approves or rejects
-→ System generates a temporary PIN
-→ Owner verifies the PIN at handover
-→ Item becomes Rented, Sold, or Completed
-→ Rental item is returned
-→ Owner confirms return
-→ Item becomes Available again
-
-Project Structure
-
-Plain Text
-
+```text
 shareshelf/
-├── frontend/
-│ ├── src/
-│ │ ├── components/
-│ │ ├── pages/
-│ │ ├── layouts/
-│ │ ├── context/
-│ │ ├── hooks/
-│ │ ├── services/
-│ │ │ ├── apiClient.ts
-│ │ │ ├── authService.ts
-│ │ │ ├── itemService.ts
-│ │ │ ├── transactionService.ts
-│ │ │ ├── chatService.ts
-│ │ │ └── reportService.ts
-│ │ ├── types/
-│ │ ├── utils/
-│ │ ├── App.tsx
-│ │ └── main.tsx
-│ ├── public/
-│ ├── .env.example
-│ └── package.json
-│
-├── backend/
-│ ├── app/
-│ │ ├── main.py
-│ │ ├── config.py
-│ │ ├── database.py
-│ │ ├── models.py
-│ │ ├── schemas.py
-│ │ ├── dependencies.py
-│ │ ├── security.py
-│ │ ├── routers/
-│ │ │ ├── auth.py
-│ │ │ ├── users.py
-│ │ │ ├── items.py
-│ │ │ ├── transactions.py
-│ │ │ ├── chat.py
-│ │ │ ├── reports.py
-│ │ │ └── admin.py
-│ │ ├── services/
-│ │ │ ├── distance_service.py
-│ │ │ ├── pin_service.py
-│ │ │ ├── transaction_service.py
-│ │ │ ├── websocket_manager.py
-│ │ │ └── image_service.py
-│ │ ├── utils/
-│ │ └── uploads/
-│ ├── alembic/
-│ ├── alembic.ini
-│ ├── requirements.txt
-│ ├── .env.example
-│ └── README.md
-│
-├── docs/
-├── .gitignore
+├── src/                    # React/TanStack Frontend
+│   ├── components/         # Shared & UI Design System components
+│   ├── routes/             # TanStack Router pages & layout files
+│   ├── contexts/           # Auth and Theme contexts
+│   ├── lib/                # API Client & Mock/Demo API layer
+│   ├── data/               # Local reference data
+│   ├── types/              # Global TypeScript declarations
+│   └── styles/             # Global CSS & Tailwind configuration
+├── public/                 # Static assets & web configuration
+├── backend/                # Optional Standalone FastAPI Service
+│   ├── app/                # Main application code (routers, schemas, models)
+│   ├── requirements.txt    # Python backend dependencies
+│   └── .env.example        # Backend environment variables
 └── README.md
+```
 
-Database Tables
+---
 
-The main database tables are:
+## 🚀 Getting Started
 
-Table
-Purpose
-users
-User accounts, roles, approximate location, and transaction statistics
-items
-Rent, donate, and sell listings
-transactions
-Requests, approvals, PIN verification, rentals, sales, and returns
-chat_messages
-Private item-based conversations
-reports
-User and listing reports for administrator review
+### 1. Running the Frontend (Demo Mode)
 
-API Endpoints
+The frontend includes a built-in in-browser reference API layer, allowing you to run, explore, and test the layout instantly without spinning up a live backend server.
 
-Authentication
+**Prerequisites:** Node.js (v18+ recommended) and npm or Bun.
 
-Plain Text
+```bash
+# Install package dependencies
+npm install
 
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/logout
-GET /api/users/me
-PUT /api/users/me
+# Start the local development server
+npm run dev
+```
 
-Listings
+Open your browser and navigate to the address displayed in your terminal (usually `http://localhost:8080` or `http://localhost:5173`).
 
-Plain Text
+---
 
-GET /api/items
-POST /api/items
-GET /api/items/{item_id}
-PUT /api/items/{item_id}
-DELETE /api/items/{item_id}
-GET /api/items/search
-POST /api/items/{item_id}/image
+### 2. Running the FastAPI Backend
 
-Transactions
+To connect the frontend to a real persistent database ecosystem:
 
-Plain Text
-
-POST /api/transactions/request
-GET /api/transactions/my
-GET /api/transactions/incoming
-PATCH /api/transactions/{transaction_id}/approve
-PATCH /api/transactions/{transaction_id}/reject
-POST /api/transactions/{transaction_id}/verify-pin
-POST /api/transactions/{transaction_id}/return
-POST /api/transactions/{transaction_id}/cancel
-
-Chat
-
-Plain Text
-
-GET /api/messages/{item_id}
-POST /api/messages
-PATCH /api/messages/{message_id}/read
-WS /ws/chat/{item_id}
-
-Reports and administration
-
-Plain Text
-
-POST /api/reports
-GET /api/admin/users
-PATCH /api/admin/users/{user_id}/ban
-PATCH /api/admin/users/{user_id}/unban
-GET /api/admin/items
-DELETE /api/admin/items/{item_id}
-GET /api/admin/reports
-PATCH /api/admin/reports/{report_id}/review
-PATCH /api/admin/reports/{report_id}/dismiss
-GET /api/admin/transactions
-
-Environment Variables
-
-Backend .env
-
-Plain Text
-
-DATABASE_URL=postgresql+psycopg://USERNAME:PASSWORD@NEON_HOST/DATABASE?sslmode=require
-JWT_SECRET_KEY=replace_with_a_long_random_secret
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-CORS_ORIGINS=http://localhost:5173
-UPLOAD_DIR=uploads
-MAX_UPLOAD_SIZE_MB=5
-
-Frontend .env
-
-Plain Text
-
-VITE_API_BASE_URL=http://localhost:8000/api
-VITE_WS_BASE_URL=ws://localhost:8000
-
-Never commit real passwords, database URLs, JWT secrets, or private keys. Keep .env files in .gitignore and commit only .env.example files.
-
-Local Setup
-
-Prerequisites
-
-Install the following before running the project:
-
-•
-Node.js 18 or newer
-
-•
-Python 3.10 or newer
-
-•
-Git
-
-•
-A Neon.tech PostgreSQL project
-
-Backend Setup
-
-Bash
-
+```bash
+# Navigate to backend directory
 cd backend
+
+# Create and activate a python virtual environment
 python -m venv .venv
-
-Activate the virtual environment on Windows:
-
-Bash
-
+# On Windows:
 .venv\Scripts\activate
-
-Activate it on macOS or Linux:
-
-Bash
-
+# On macOS/Linux:
 source .venv/bin/activate
 
-Install backend dependencies:
-
-Bash
-
+# Install required dependencies
 pip install -r requirements.txt
 
-Copy .env.example to .env and add the Neon PostgreSQL connection string and JWT secret.
+# Configure environment variables
+cp .env.example .env  # Update your local DATABASE_URL here
 
-Run database migrations:
+# Seed database with initial demo data/admin accounts
+python -m app.seed
 
-Bash
+# Start up the development server
+uvicorn app.main:app --reload --port 8000
+```
 
-alembic upgrade head
+- Interactive Swagger API docs will be active at: `http://localhost:8000/docs`
+- **Frontend Linkage:** Add `VITE_API_BASE_URL=http://localhost:8000/api` to your frontend variables and restart the web server.
 
-Start the FastAPI server:
+---
 
-Bash
+## 🔒 Privacy & Safety Model
 
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+- **Coordinates Masking:** Exact locations are coarsened into an approximate 1 km grid sector utilizing custom fuzz calculations before saving.
+- **Data Isolation:** Critical contact entries like telephone fields or precise home coordinates are completely excluded from public endpoints.
+- **PIN Hashing:** Handover pickup verification pins are stored strictly using secure one-way bcrypt hashes.
 
-The API documentation will be available at:
+---
 
-Plain Text
+## 🎓 Academic Context
 
-http://127.0.0.1:8000/docs
-
-Frontend Setup
-
-Open a second terminal:
-
-Bash
-
-cd frontend
-npm install
-npm run dev
-
-The frontend will normally be available at:
-
-Plain Text
-
-http://localhost:5173
-
-Make sure VITE_API_BASE_URL and VITE_WS_BASE_URL point to the running FastAPI backend.
-
-Security Notes
-
-ShareShelf does not request or display phone numbers. Exact private addresses should not be exposed; listings should use approximate locations or area names.
-
-Passwords must be stored only as secure hashes. The frontend must never receive database credentials or the JWT secret. Transaction state changes, PIN verification, ownership checks, admin permissions, and WebSocket access must be validated by the backend.
-
-The pickup PIN should be generated securely, stored as a hash where possible, invalidated after successful verification, and never reused.
-
-Testing Checklist
-
-The following complete workflow should be tested before the final demonstration:
-
-Plain Text
-
-Register
-→ Login
-→ Create listing
-→ Upload image
-→ Browse listings
-→ Search and filter
-→ Test map and radius search
-→ Open item details
-→ Send private message
-→ Request item
-→ Owner approves request
-→ Generate PIN
-→ Test incorrect PIN
-→ Verify correct PIN
-→ Change item status
-→ Confirm rental return
-→ Make item available again
-→ Submit report
-→ Review report as admin
-
-Also test duplicate accounts, invalid passwords, unauthorized listing edits, unavailable item requests, unauthorized chat access, normal-user access to admin routes, mobile layout, dark mode, image validation, and network errors.
-
-Development Roadmap
-
-Phase
-Deliverables
-Phase 1
-Project setup, Neon connection, SQLAlchemy models, and Alembic migrations
-Phase 2
-Registration, login, JWT authentication, and role-based permissions
-Phase 3
-Listing creation, editing, deletion, image upload, and item status
-Phase 4
-Browse page, filters, Leaflet map, OpenStreetMap, and Haversine search
-Phase 5
-Transaction requests, approval/rejection, and status lifecycle
-Phase 6
-4-digit PIN generation, verification, and rental return
-Phase 7
-Native FastAPI WebSocket chat and message persistence
-Phase 8
-Reports, moderation, admin dashboard, and user management
-Phase 9
-Responsive UI, light/dark theme, animations, SEO, and accessibility
-Phase 10
-Integration testing, documentation, deployment, and final presentation
-
-Academic Project Context
-
-ShareShelf is designed as a Final Year Project demonstrating full-stack development, REST API design, relational database modeling, authentication, WebSocket communication, geospatial distance calculation, workflow/state management, moderation, responsive design, and privacy-aware community technology.
-
-License
-
-This project is intended for academic and educational use. Add an appropriate license before public release.
-
-Author
-
-Developed as a Final Year Project for the ShareShelf community resource-sharing platform.
+**ShareShelf** was developed by **Sana Javed** as a Final Year Project demonstrating full-stack engineering architecture, safe relational data modeling, custom state tracking lifecycles, and a privacy-centric application approach.
