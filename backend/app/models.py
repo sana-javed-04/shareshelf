@@ -87,6 +87,7 @@ class Transaction(Base, TimestampMixin):
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     status: Mapped[str] = mapped_column(TransactionStatusEnum, default="Pending", nullable=False)
     pickup_pin_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    pickup_pin_plain: Mapped[str | None] = mapped_column(String, nullable=True)
     pin_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     start_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

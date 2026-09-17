@@ -23,7 +23,7 @@ def run() -> None:
 
         admin = User(
             username="admin",
-            email="admin@shareshelf.local",
+            email="admin@shareshelf.com",
             password_hash=hash_password("adminpass123"),
             role="admin",
             area_name="Riverside",
@@ -32,7 +32,7 @@ def run() -> None:
         )
         member = User(
             username="demo",
-            email="demo@shareshelf.local",
+            email="demo@shareshelf.com",
             password_hash=hash_password("demopass123"),
             area_name="Maple Ward",
             latitude=51.52,

@@ -30,7 +30,7 @@ class LoginRequest(BaseModel):
 class UserOut(ORMModel):
     id: int
     username: str
-    email: EmailStr
+    email: str
     role: str
     is_banned: bool
     latitude: float | None
