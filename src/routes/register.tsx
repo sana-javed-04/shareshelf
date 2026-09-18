@@ -208,12 +208,12 @@ function RegisterPage() {
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className="h-7 text-xs text-primary hover:bg-primary/10"
+                  className="h-7 text-xs font-medium text-foreground hover:bg-accent"
                   onClick={openGoogleMaps}
                 >
-                  <MapPin className="mr-1 size-3" />
+                  <MapPin className="mr-1 size-3 text-primary" />
                   Open Google Maps
                 </Button>
                 <Button

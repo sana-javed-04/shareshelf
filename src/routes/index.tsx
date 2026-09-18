@@ -17,6 +17,7 @@ import { ItemCard } from "@/components/ItemCard";
 import { ItemGridSkeleton } from "@/components/LoadingSkeleton";
 import { itemService } from "@/services/itemService";
 import { EmptyState } from "@/components/EmptyState";
+import { formatCurrency, formatDistance } from "@/lib/utils/formatters";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -79,11 +80,26 @@ const VALUES = [
   },
 ];
 
+function formatListingSubtitle(item: {
+  listing_type: string;
+  price?: number | null;
+  pricing_unit?: string | null;
+}) {
+  const priceText = item.price != null ? formatCurrency(item.price) : "Free";
+  if (item.listing_type === "Donate") return "Donation · Free";
+  if (item.listing_type === "Rent") {
+    return `For rent · ${priceText}/${item.pricing_unit ?? "day"}`;
+  }
+  return `For sale · ${priceText}`;
+}
+
 function Home() {
   const { data, isLoading } = useQuery({
     queryKey: ["items", "featured"],
     queryFn: () => itemService.list({ page_size: 6, sort: "newest" }),
   });
+
+  const heroItems = data?.results?.slice(0, 4) ?? [];
 
   return (
     <SiteLayout className="pt-0">
@@ -139,27 +155,56 @@ function Home() {
             className="relative"
           >
             <div className="surface-gradient rounded-3xl border p-6 shadow-soft">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                On the shelf near you
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  On the shelf near you
+                </p>
+                <Link to="/browse" className="text-xs font-medium text-primary hover:underline">
+                  View all
+                </Link>
+              </div>
+
               <ul className="mt-4 space-y-3">
-                {[
-                  { t: "Cordless drill", s: "For rent · Rs 350/day", d: "0.6 km away" },
-                  { t: "Data structures textbooks", s: "Donation · Free", d: "1.2 km away" },
-                  { t: "Camping tent, 4-person", s: "For rent · Rs 900/day", d: "2.4 km away" },
-                  { t: "Study desk", s: "For sale · Rs 6,500", d: "3.1 km away" },
-                ].map((row) => (
-                  <li
-                    key={row.t}
-                    className="flex items-center justify-between gap-4 rounded-xl border bg-card/80 px-4 py-3 backdrop-blur"
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold">{row.t}</span>
-                      <span className="block text-xs text-muted-foreground">{row.s}</span>
-                    </span>
-                    <span className="shrink-0 text-xs font-medium text-primary">{row.d}</span>
+                {isLoading ? (
+                  Array.from({ length: 4 }).map((_, idx) => (
+                    <li key={idx} className="h-14 animate-pulse rounded-xl border bg-card/50" />
+                  ))
+                ) : heroItems.length > 0 ? (
+                  heroItems.map((item) => {
+                    const rawArea = item.area_name ?? "";
+                    const cleanArea = rawArea.split("||")[0].split("http")[0].trim() || "Nearby";
+
+                    return (
+                      <li key={item.id}>
+                        <a
+                          href={`/items/${item.id}`}
+                          className="group flex items-center justify-between gap-3 rounded-xl border bg-card/80 px-4 py-3 backdrop-blur transition-colors hover:border-primary/40 hover:bg-card"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                              {item.title}
+                            </span>
+                            <span className="block truncate text-xs text-muted-foreground mt-0.5">
+                              {formatListingSubtitle(item)}
+                            </span>
+                          </div>
+
+                          <div className="shrink-0 text-right">
+                            <span className="inline-block max-w-32.5 truncate text-xs font-medium text-primary">
+                              {item.distance_km != null
+                                ? formatDistance(item.distance_km)
+                                : cleanArea}
+                            </span>
+                          </div>
+                        </a>
+                      </li>
+                    );
+                  })
+                ) : (
+                  <li className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
+                    No active items yet. Be the first to list!
                   </li>
-                ))}
+                )}
               </ul>
             </div>
           </motion.div>

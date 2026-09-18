@@ -51,3 +51,7 @@ export function timeAgo(value: string): string {
 export function initials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
+
+export function formatCurrency(amount: number): string {
+  return `Rs ${amount.toLocaleString()}`;
+}

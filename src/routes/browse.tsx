@@ -7,7 +7,6 @@ import {
   List,
   LocateFixed,
   MapPin,
-  Map as MapIcon,
   RotateCcw,
   Search,
   SlidersHorizontal,
@@ -28,10 +27,8 @@ import {
 import { ItemCard } from "@/components/ItemCard";
 import { ItemGridSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyState } from "@/components/EmptyState";
-import MapView, { itemsToPoints } from "@/components/MapView";
 import { itemService } from "@/services/itemService";
 import { useAuth } from "@/context/AuthContext";
-import { DEFAULT_CENTER } from "@/lib/utils/geo";
 import { CATEGORIES, CONDITIONS, LISTING_TYPES, RADIUS_OPTIONS, type ItemQuery } from "@/lib/types";
 
 export const Route = createFileRoute("/browse")({
@@ -84,7 +81,6 @@ const INITIAL: Filters = {
   sort: "newest",
 };
 
-// Common landmarks fallback coordinates
 const LOCAL_LANDMARKS: Record<string, { lat: number; lng: number }> = {
   dhq: { lat: 30.8122, lng: 73.4475 },
   hospital: { lat: 30.8122, lng: 73.4475 },
@@ -111,15 +107,13 @@ function BrowsePage() {
   const { user } = useAuth();
   const [filters, setFilters] = useState<Filters>(INITIAL);
   const [page, setPage] = useState(1);
-  const [view, setView] = useState<"grid" | "list" | "map">("grid");
+  const [view, setView] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
 
-  // Dynamic Center State
-  const [center, setCenter] = useState<{ lat: number; lng: number }>(
-    () =>
-      user?.latitude != null && user?.longitude != null
-        ? { lat: user.latitude, lng: user.longitude }
-        : { lat: 30.8138, lng: 73.4534 }, // Default to local region
+  const [center, setCenter] = useState<{ lat: number; lng: number }>(() =>
+    user?.latitude != null && user?.longitude != null
+      ? { lat: user.latitude, lng: user.longitude }
+      : { lat: 30.8138, lng: 73.4534 },
   );
 
   useEffect(() => {
@@ -131,19 +125,16 @@ function BrowsePage() {
     }
   }, [user?.area_name, user?.latitude, user?.longitude]);
 
-  // Update center when area input changes
   useEffect(() => {
     const raw = filters.area.trim();
     if (!raw) return;
 
-    // 1. Coordinates extracted from Google Maps text / link
     const parsed = parseCoords(raw);
     if (parsed) {
       setCenter(parsed);
       return;
     }
 
-    // 2. Known local spots fast match
     const lower = raw.toLowerCase();
     for (const [key, coords] of Object.entries(LOCAL_LANDMARKS)) {
       if (lower.includes(key)) {
@@ -152,7 +143,6 @@ function BrowsePage() {
       }
     }
 
-    // 3. Online Geocoder fallback
     const timer = setTimeout(() => {
       fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(raw)}&limit=1`,
@@ -277,7 +267,6 @@ function BrowsePage() {
         </Select>
       </div>
 
-      {/* --- Area / City Box --- */}
       <div className="space-y-2 rounded-xl border bg-muted/40 p-3.5">
         <div className="flex items-center justify-between">
           <Label htmlFor="filter-area" className="text-sm font-semibold">
@@ -364,7 +353,6 @@ function BrowsePage() {
         />
       </div>
 
-      {/* --- Radius Buttons --- */}
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium">Distance from your area</legend>
         <div className="flex flex-wrap gap-2">
@@ -448,7 +436,6 @@ function BrowsePage() {
               [
                 { key: "grid", Icon: LayoutGrid, label: "Grid view" },
                 { key: "list", Icon: List, label: "List view" },
-                { key: "map", Icon: MapIcon, label: "Map view" },
               ] as const
             ).map(({ key, Icon, label }) => (
               <Button
@@ -505,13 +492,6 @@ function BrowsePage() {
                 </Button>
               }
             />
-          ) : view === "map" ? (
-            <MapView
-              className="h-136"
-              points={itemsToPoints(results)}
-              center={center}
-              radiusKm={filters.radius || undefined}
-            />
           ) : view === "list" ? (
             <div className="space-y-4">
               {results.map((item) => (
@@ -526,7 +506,7 @@ function BrowsePage() {
             </div>
           )}
 
-          {view !== "map" && totalPages > 1 && (
+          {totalPages > 1 && (
             <nav className="mt-10 flex items-center justify-center gap-3" aria-label="Pagination">
               <Button
                 variant="secondary"
