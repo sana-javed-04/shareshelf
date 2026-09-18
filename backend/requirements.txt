@@ -36,3 +36,5 @@ passlib[bcrypt]==1.7.4
 python-multipart==0.0.20
 cloudinary==1.41.0
 websockets==13.1
+
+psycopg[binary]>=3.1.0
