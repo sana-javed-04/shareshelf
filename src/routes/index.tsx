@@ -1,7 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { ArrowRight, HandHeart, Lock, MapPin, MessageSquare, Recycle, ShieldCheck, Tag } from "lucide-react";
+import {
+  ArrowRight,
+  HandHeart,
+  Lock,
+  MapPin,
+  MessageSquare,
+  Recycle,
+  ShieldCheck,
+  Tag,
+} from "lucide-react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { ItemCard } from "@/components/ItemCard";
@@ -53,9 +62,21 @@ const STEPS = [
 ];
 
 const VALUES = [
-  { icon: Lock, title: "Privacy by default", body: "Contact details are never exposed. Chat stays in-app." },
-  { icon: MapPin, title: "Approximate locations", body: "Coordinates are coarsened before anyone sees them." },
-  { icon: HandHeart, title: "Community-first", body: "Donations sit beside rentals — generosity is the default." },
+  {
+    icon: Lock,
+    title: "Privacy by default",
+    body: "Contact details are never exposed. Chat stays in-app.",
+  },
+  {
+    icon: MapPin,
+    title: "Approximate locations",
+    body: "Coordinates are coarsened before anyone sees them.",
+  },
+  {
+    icon: HandHeart,
+    title: "Community-first",
+    body: "Donations sit beside rentals — generosity is the default.",
+  },
 ];
 
 function Home() {
@@ -65,7 +86,7 @@ function Home() {
   });
 
   return (
-    <SiteLayout className="pt-0" >
+    <SiteLayout className="pt-0">
       <section className="relative -mx-4 -mt-10 overflow-hidden px-4 pb-20 pt-16 sm:-mx-6 sm:px-6 sm:pt-24">
         <div className="hero-glow pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
@@ -83,8 +104,8 @@ function Home() {
               <span className="text-primary">everything you need.</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-              ShareShelf lets people in the same street, campus or town rent, donate and resell things to each
-              other — without ever handing over a phone number or an exact address.
+              ShareShelf lets people in the same street, campus or town rent, donate and resell
+              things to each other — without ever handing over a phone number or an exact address.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -147,7 +168,9 @@ function Home() {
 
       <section id="how-it-works" className="scroll-mt-24 py-16">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">How ShareShelf works</h2>
+          <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            How ShareShelf works
+          </h2>
           <p className="mt-3 text-muted-foreground">
             Four steps from “I need this for a weekend” to a confirmed, privacy-safe handover.
           </p>
@@ -178,7 +201,9 @@ function Home() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="font-display text-3xl font-bold tracking-tight">Fresh on the shelf</h2>
-            <p className="mt-2 text-muted-foreground">The newest listings from members around you.</p>
+            <p className="mt-2 text-muted-foreground">
+              The newest listings from members around you.
+            </p>
           </div>
           <Button asChild variant="secondary">
             <Link to="/browse">See all listings</Link>

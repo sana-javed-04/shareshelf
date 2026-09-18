@@ -43,7 +43,11 @@ export function RowsSkeleton({ rows = 4 }: { rows?: number }) {
 
 export function StatsSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" role="status" aria-label="Loading stats">
+    <div
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      role="status"
+      aria-label="Loading stats"
+    >
       {Array.from({ length: count }).map((_, i) => (
         <Skeleton key={i} className="h-24 w-full rounded-2xl" />
       ))}

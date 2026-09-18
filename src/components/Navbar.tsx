@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { LayoutDashboard, LogOut, Menu, MessageSquare, Plus, Shield, User as UserIcon, X } from "lucide-react";
+import {
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Plus,
+  Shield,
+  User as UserIcon,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -36,7 +45,10 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/85 backdrop-blur-lg">
-      <nav aria-label="Main" className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
+      <nav
+        aria-label="Main"
+        className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6"
+      >
         <Link to="/" aria-label="ShareShelf home" className="shrink-0">
           <Logo />
         </Link>
@@ -70,7 +82,9 @@ export function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="secondary" size="icon" aria-label="Account menu">
-                    <span className="text-xs font-bold">{user.username.slice(0, 2).toUpperCase()}</span>
+                    <span className="text-xs font-bold">
+                      {user.username.slice(0, 2).toUpperCase()}
+                    </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -136,7 +150,11 @@ export function Navbar() {
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpen((v) => !v)}
           >
-            {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
+            {open ? (
+              <X className="size-5" aria-hidden="true" />
+            ) : (
+              <Menu className="size-5" aria-hidden="true" />
+            )}
           </Button>
         </div>
       </nav>
@@ -166,24 +184,40 @@ export function Navbar() {
               {user ? (
                 <>
                   <li>
-                    <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-secondary">
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setOpen(false)}
+                      className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-secondary"
+                    >
                       Dashboard
                     </Link>
                   </li>
                   <li>
-                    <Link to="/post-item" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-secondary">
+                    <Link
+                      to="/post-item"
+                      onClick={() => setOpen(false)}
+                      className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-secondary"
+                    >
                       Post an item
                     </Link>
                   </li>
                   <li>
-                    <button onClick={handleLogout} className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium hover:bg-secondary">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium hover:bg-secondary"
+                    >
                       Sign out
                     </button>
                   </li>
                 </>
               ) : (
                 <li className="flex gap-2 pt-2">
-                  <Button asChild variant="secondary" className="flex-1" onClick={() => setOpen(false)}>
+                  <Button
+                    asChild
+                    variant="secondary"
+                    className="flex-1"
+                    onClick={() => setOpen(false)}
+                  >
                     <Link to="/login">Sign in</Link>
                   </Button>
                   <Button asChild className="flex-1" onClick={() => setOpen(false)}>

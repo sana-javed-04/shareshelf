@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -33,7 +41,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     apply(stored);
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => {
-      if ((window.localStorage.getItem(THEME_STORAGE_KEY) ?? "system") === "system") apply("system");
+      if ((window.localStorage.getItem(THEME_STORAGE_KEY) ?? "system") === "system")
+        apply("system");
     };
     media.addEventListener("change", onChange);
     return () => media.removeEventListener("change", onChange);

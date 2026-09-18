@@ -32,3 +32,11 @@ dist-ssr
 *.sw?
 
 .env
+
+
+# Python / Backend
+backend/.venv/
+.venv/
+__pycache__/
+*.pyc
+shareshelf.db

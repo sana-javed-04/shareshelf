@@ -21,9 +21,15 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign in — ShareShelf" },
-      { name: "description", content: "Sign in to ShareShelf to rent, donate and resell items with neighbours." },
+      {
+        name: "description",
+        content: "Sign in to ShareShelf to rent, donate and resell items with neighbours.",
+      },
       { property: "og:title", content: "Sign in — ShareShelf" },
-      { property: "og:description", content: "Access your ShareShelf listings, requests and messages." },
+      {
+        property: "og:description",
+        content: "Access your ShareShelf listings, requests and messages.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -72,7 +78,11 @@ function LoginPage() {
           Sign in to manage your listings, requests and in-app messages.
         </p>
 
-        <form onSubmit={onSubmit} noValidate className="mt-8 space-y-5 rounded-2xl border bg-card p-6 shadow-soft">
+        <form
+          onSubmit={onSubmit}
+          noValidate
+          className="mt-8 space-y-5 rounded-2xl border bg-card p-6 shadow-soft"
+        >
           <div className="space-y-2">
             <Label htmlFor="username">Username or email</Label>
             <Input
@@ -121,9 +131,11 @@ function LoginPage() {
           <div className="mt-6 rounded-xl border border-dashed bg-secondary/50 p-4 text-sm">
             <p className="font-semibold">Preview demo accounts</p>
             <p className="mt-1 text-muted-foreground">
-              Member: <code className="font-mono">aisha</code> / <code className="font-mono">password123</code>
+              Member: <code className="font-mono">aisha</code> /{" "}
+              <code className="font-mono">password123</code>
               <br />
-              Admin: <code className="font-mono">admin</code> / <code className="font-mono">admin12345</code>
+              Admin: <code className="font-mono">admin</code> /{" "}
+              <code className="font-mono">admin12345</code>
             </p>
           </div>
         )}

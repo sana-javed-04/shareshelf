@@ -16,12 +16,21 @@ const CATEGORY_TINT: Record<string, string> = {
   Other: "from-muted to-secondary",
 };
 
+// Helper: Extract clean address and strip out the || https://... part
+export function getCleanLocation(rawLocation?: string | null): string {
+  if (!rawLocation) return "Local Area";
+  if (rawLocation.includes("||")) {
+    return rawLocation.split("||")[0].trim();
+  }
+  return rawLocation.trim();
+}
+
 export function ItemThumb({ item, className }: { item: Item; className?: string }) {
   if (item.image_path) {
     return (
       <img
         src={item.image_path}
-        alt={`${item.title} — ${item.item_condition} ${item.category.toLowerCase()} listed in ${item.area_name}`}
+        alt={`${item.title} — ${item.item_condition} ${item.category.toLowerCase()}`}
         loading="lazy"
         className={cn("size-full object-cover", className)}
       />
@@ -32,7 +41,7 @@ export function ItemThumb({ item, className }: { item: Item; className?: string 
       role="img"
       aria-label={`Illustrated placeholder for ${item.title}`}
       className={cn(
-        "grid size-full place-items-center bg-gradient-to-br",
+        "grid size-full place-items-center bg-linear-to-br",
         CATEGORY_TINT[item.category] ?? CATEGORY_TINT.Other,
         className,
       )}
@@ -47,6 +56,7 @@ export function ItemThumb({ item, className }: { item: Item; className?: string 
 
 export function ItemCard({ item, view = "grid" }: { item: Item; view?: "grid" | "list" }) {
   const distance = formatDistance(item.distance_km);
+  const cleanLocation = getCleanLocation(item.area_name);
 
   if (view === "list") {
     return (
@@ -71,7 +81,7 @@ export function ItemCard({ item, view = "grid" }: { item: Item; view?: "grid" | 
             <span>{item.item_condition}</span>
             <span className="inline-flex items-center gap-1">
               <MapPin className="size-3.5" aria-hidden="true" />
-              {item.area_name}
+              {cleanLocation}
             </span>
             {distance && <span>{distance}</span>}
           </div>
@@ -99,7 +109,10 @@ export function ItemCard({ item, view = "grid" }: { item: Item; view?: "grid" | 
       className="card-lift group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-soft"
     >
       <div className="relative h-44 overflow-hidden">
-        <ItemThumb item={item} className="transition-transform duration-500 group-hover:scale-105" />
+        <ItemThumb
+          item={item}
+          className="transition-transform duration-500 group-hover:scale-105"
+        />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           <ListingTypeBadge type={item.listing_type} className="backdrop-blur" />
         </div>
@@ -111,14 +124,16 @@ export function ItemCard({ item, view = "grid" }: { item: Item; view?: "grid" | 
         <h3 className="line-clamp-1 text-base font-semibold">{item.title}</h3>
         <p className="line-clamp-2 text-sm text-muted-foreground">{item.description}</p>
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="rounded-md bg-secondary px-2 py-0.5 text-secondary-foreground">{item.category}</span>
+          <span className="rounded-md bg-secondary px-2 py-0.5 text-secondary-foreground">
+            {item.category}
+          </span>
           <span className="rounded-md bg-secondary px-2 py-0.5 text-secondary-foreground">
             {item.item_condition}
           </span>
         </div>
         <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
-          <MapPin className="size-3.5" aria-hidden="true" />
-          {item.area_name}
+          <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+          <span className="truncate">{cleanLocation}</span>
           {distance && <span className="ml-1 font-medium text-foreground/70">· {distance}</span>}
         </p>
         <div className="mt-auto flex items-center justify-between pt-3">

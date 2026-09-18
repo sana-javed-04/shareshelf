@@ -11,7 +11,10 @@ export const Route = createFileRoute("/terms")({
           "The community rules for renting, donating and reselling on ShareShelf: honest listings, safe handovers, and respectful conduct.",
       },
       { property: "og:title", content: "Terms of use — ShareShelf" },
-      { property: "og:description", content: "Community rules for safe, honest local exchanges on ShareShelf." },
+      {
+        property: "og:description",
+        content: "Community rules for safe, honest local exchanges on ShareShelf.",
+      },
     ],
   }),
   component: TermsPage,

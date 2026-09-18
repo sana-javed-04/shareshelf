@@ -60,8 +60,10 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --shadow-soft: 0 1px 2px oklch(0.25 0.05 165 / 0.05), 0 12px 32px -12px oklch(0.25 0.05 165 / 0.18);
-  --shadow-lift: 0 2px 4px oklch(0.25 0.05 165 / 0.06), 0 24px 48px -20px oklch(0.25 0.05 165 / 0.3);
+  --shadow-soft:
+    0 1px 2px oklch(0.25 0.05 165 / 0.05), 0 12px 32px -12px oklch(0.25 0.05 165 / 0.18);
+  --shadow-lift:
+    0 2px 4px oklch(0.25 0.05 165 / 0.06), 0 24px 48px -20px oklch(0.25 0.05 165 / 0.3);
 }
 
 :root {
@@ -184,9 +186,21 @@
 
 @utility hero-glow {
   background-image:
-    radial-gradient(60% 60% at 15% 10%, color-mix(in oklch, var(--color-primary) 22%, transparent), transparent 70%),
-    radial-gradient(50% 50% at 85% 20%, color-mix(in oklch, var(--color-accent) 20%, transparent), transparent 70%),
-    radial-gradient(60% 60% at 50% 100%, color-mix(in oklch, var(--color-warning) 14%, transparent), transparent 70%);
+    radial-gradient(
+      60% 60% at 15% 10%,
+      color-mix(in oklch, var(--color-primary) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 50% at 85% 20%,
+      color-mix(in oklch, var(--color-accent) 20%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      60% 60% at 50% 100%,
+      color-mix(in oklch, var(--color-warning) 14%, transparent),
+      transparent 70%
+    );
 }
 
 @utility card-lift {
@@ -201,8 +215,16 @@
 
 @utility grid-fade {
   background-image:
-    linear-gradient(to right, color-mix(in oklch, var(--color-border) 70%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklch, var(--color-border) 70%, transparent) 1px, transparent 1px);
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--color-border) 70%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--color-border) 70%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 48px 48px;
   mask-image: radial-gradient(70% 70% at 50% 30%, black, transparent);
 }

@@ -67,13 +67,14 @@ export default function MapView({
       await import("leaflet/dist/leaflet.css");
       if (cancelled || !containerRef.current || mapRef.current) return;
 
-      map = L.map(containerRef.current, { scrollWheelZoom: false, attributionControl: true }).setView(
-        [center?.lat ?? DEFAULT_CENTER.lat, center?.lng ?? DEFAULT_CENTER.lng],
-        zoom,
-      );
+      map = L.map(containerRef.current, {
+        scrollWheelZoom: false,
+        attributionControl: true,
+      }).setView([center?.lat ?? DEFAULT_CENTER.lat, center?.lng ?? DEFAULT_CENTER.lng], zoom);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 18,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
       mapRef.current = map;
 
@@ -120,7 +121,9 @@ export default function MapView({
         const marker = L.marker([p.lat, p.lng], { icon, title: p.title }).addTo(map);
         marker.bindPopup(
           `<strong>${p.title}</strong>${p.subtitle ? `<br/><span>${p.subtitle}</span>` : ""}${
-            p.href ? `<br/><a href="${p.href}" style="color:var(--color-primary);font-weight:600">View details</a>` : ""
+            p.href
+              ? `<br/><a href="${p.href}" style="color:var(--color-primary);font-weight:600">View details</a>`
+              : ""
           }`,
         );
         layerRef.current.push(marker);
@@ -137,7 +140,8 @@ export default function MapView({
           weight: 1,
         }).addTo(map);
       }
-      if (focus) map.setView([focus.lat, focus.lng], radiusKm ? Math.max(10, 14 - radiusKm / 4) : zoom);
+      if (focus)
+        map.setView([focus.lat, focus.lng], radiusKm ? Math.max(10, 14 - radiusKm / 4) : zoom);
     })();
     return () => {
       cancelled = true;

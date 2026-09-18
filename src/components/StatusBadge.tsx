@@ -15,7 +15,10 @@ const TX_STYLES: Record<TransactionStatus, { className: string; Icon: typeof Che
   Returned: { className: "bg-success/15 text-success border-success/30", Icon: RotateCcw },
   Completed: { className: "bg-success/15 text-success border-success/30", Icon: CheckCircle2 },
   Cancelled: { className: "bg-muted text-muted-foreground border-border", Icon: XCircle },
-  Rejected: { className: "bg-destructive/12 text-destructive border-destructive/30", Icon: XCircle },
+  Rejected: {
+    className: "bg-destructive/12 text-destructive border-destructive/30",
+    Icon: XCircle,
+  },
 };
 
 const base =

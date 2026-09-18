@@ -23,7 +23,11 @@ export function RequireAuth({ children, admin = false }: { children: ReactNode; 
 
   useEffect(() => {
     if (!loading && !user) {
-      void navigate({ to: "/login", search: { redirect: window.location.pathname }, replace: true });
+      void navigate({
+        to: "/login",
+        search: { redirect: window.location.pathname },
+        replace: true,
+      });
     }
   }, [loading, user, navigate]);
 

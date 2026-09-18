@@ -13,7 +13,8 @@ export const Route = createFileRoute("/privacy")({
       { property: "og:title", content: "Privacy policy — ShareShelf" },
       {
         property: "og:description",
-        content: "Our privacy commitments: contact details stay hidden and locations are always approximate.",
+        content:
+          "Our privacy commitments: contact details stay hidden and locations are always approximate.",
       },
     ],
   }),

@@ -1,12 +1,12 @@
-import { api, buildQuery, getToken, isDemoMode, WS_BASE_URL } from "@/lib/api/client";
+import { api, getToken, isDemoMode, WS_BASE_URL } from "@/lib/api/client";
 import type { ChatMessage, Conversation } from "@/lib/types";
 
 export const chatService = {
   conversations() {
     return api.get<Conversation[]>("/messages/conversations");
   },
-  getChatHistory(itemId: number, partnerId?: number) {
-    return api.get<ChatMessage[]>(`/messages/${itemId}${buildQuery({ partner_id: partnerId })}`);
+  getChatHistory(itemId: number, partnerId: number) {
+    return api.get<ChatMessage[]>(`/messages/${itemId}/${partnerId}`);
   },
   sendMessage(itemId: number, receiverId: number, message: string) {
     return api.post<ChatMessage>("/messages", {
@@ -15,9 +15,6 @@ export const chatService = {
       message,
     });
   },
-  markMessageAsRead(messageId: number) {
-    return api.patch<ChatMessage>(`/messages/${messageId}/read`);
-  },
 };
 
 export type ChatSocket = {
@@ -25,21 +22,20 @@ export type ChatSocket = {
   close: () => void;
 };
 
-/**
- * Opens the native FastAPI WebSocket at /ws/chat/{item_id}.
- * In demo mode (no VITE_WS_BASE_URL) it degrades to REST polling so the chat
- * UI still works end-to-end inside the preview.
- */
 export function connectToChat(
   itemId: number,
   partnerId: number,
   onMessage: (message: ChatMessage) => void,
   onStatus?: (status: "connecting" | "open" | "closed") => void,
 ): ChatSocket {
-  if (isDemoMode || !WS_BASE_URL) {
+  const token = getToken();
+
+  // Fallback Polling Mode (agar WebSocket server available na ho)
+  if (isDemoMode || !WS_BASE_URL || !token) {
     onStatus?.("open");
     let lastId = 0;
     let stopped = false;
+
     const poll = async () => {
       if (stopped) return;
       try {
@@ -47,11 +43,13 @@ export function connectToChat(
         history.filter((m) => m.id > lastId).forEach((m) => onMessage(m));
         if (history.length) lastId = Math.max(lastId, ...history.map((m) => m.id));
       } catch {
-        /* ignore transient polling errors */
+        // ignore polling error
       }
     };
+
     void poll();
-    const timer = window.setInterval(poll, 4000);
+    const timer = window.setInterval(poll, 3000);
+
     return {
       send: (message: string) => {
         void chatService.sendMessage(itemId, partnerId, message).then(poll);
@@ -64,20 +62,48 @@ export function connectToChat(
     };
   }
 
+  // Real-Time Native FastAPI WebSocket Connection
   onStatus?.("connecting");
-  const socket = new WebSocket(`${WS_BASE_URL}/ws/chat/${itemId}?token=${getToken() ?? ""}`);
+  const wsUrl = `${WS_BASE_URL}/api/messages/ws/${token}`;
+  const socket = new WebSocket(wsUrl);
+
   socket.onopen = () => onStatus?.("open");
   socket.onclose = () => onStatus?.("closed");
   socket.onmessage = (event) => {
     try {
-      onMessage(JSON.parse(event.data) as ChatMessage);
+      const data = JSON.parse(event.data);
+      // Ensure only messages for this thread are processed
+      if (data.item_id === itemId) {
+        onMessage({
+          id: data.id,
+          item_id: data.item_id,
+          sender_id: data.sender_id,
+          receiver_id: data.receiver_id,
+          message: data.message,
+          timestamp: data.timestamp || new Date().toISOString(),
+          is_read: data.is_read ?? false,
+        } as unknown as ChatMessage);
+      }
     } catch {
-      /* ignore malformed frames */
+      // ignore
     }
   };
+
   return {
-    send: (message: string) =>
-      socket.send(JSON.stringify({ receiver_id: partnerId, message })),
+    send: (message: string) => {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            receiver_id: partnerId,
+            item_id: itemId,
+            message,
+          }),
+        );
+      } else {
+        // Fallback agar socket connect hone mein delay ho
+        void chatService.sendMessage(itemId, partnerId, message);
+      }
+    },
     close: () => socket.close(),
   };
 }

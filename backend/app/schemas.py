@@ -181,17 +181,20 @@ class ReportCreate(BaseModel):
     reported_user_id: int | None = None
 
 
-class ReportOut(ORMModel):
+class ReportOut(BaseModel):
     id: int
     reported_by: int
-    reported_user_id: int | None
-    reported_item_id: int | None
+    reported_item_id: int | None = None
+    reported_user_id: int | None = None
+    item_title: str | None = None  
     reason: str
-    description: str | None
+    description: str | None = None
     status: str
-    reviewed_by: int | None
-    reviewed_at: datetime | None
     created_at: datetime
+    reviewed_by: int | None = None
+    reviewed_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DashboardStats(BaseModel):

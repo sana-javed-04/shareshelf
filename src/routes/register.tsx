@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { toast } from "sonner";
-import { LocateFixed } from "lucide-react";
+import { ExternalLink, LocateFixed, MapPin } from "lucide-react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { errorMessage } from "@/lib/api/errors";
 import { DEFAULT_CENTER, fuzzCoordinates } from "@/lib/utils/geo";
-import MapView from "@/components/MapView";
 
 const schema = z.object({
   username: z
@@ -30,15 +29,28 @@ export const Route = createFileRoute("/register")({
       { title: "Create your account — ShareShelf" },
       {
         name: "description",
-        content: "Join ShareShelf to rent, donate and resell items locally. No phone number required.",
+        content:
+          "Join ShareShelf to rent, donate and resell items locally. No phone number required.",
       },
       { property: "og:title", content: "Create your account — ShareShelf" },
-      { property: "og:description", content: "Join your neighbourhood's shared shelf in under a minute." },
+      {
+        property: "og:description",
+        content: "Join your neighbourhood's shared shelf in under a minute.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
   component: RegisterPage,
 });
+
+// Helper: Extract coordinates from Google Maps link or raw text
+function parseCoordsFromInput(text: string): { lat: number; lng: number } | null {
+  const match = text.match(/(@|q=|\?ll=)(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (match) {
+    return { lat: parseFloat(match[2]), lng: parseFloat(match[3]) };
+  }
+  return null;
+}
 
 function RegisterPage() {
   const { register, user } = useAuth();
@@ -47,22 +59,70 @@ function RegisterPage() {
   const [coords, setCoords] = useState(DEFAULT_CENTER);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [locating, setLocating] = useState(false);
 
   useEffect(() => {
     if (user) void navigate({ to: "/dashboard", replace: true });
   }, [user, navigate]);
+
+  function openGoogleMaps() {
+    window.open("https://www.google.com/maps", "_blank");
+    toast.info("Find your area on Google Maps, then type or paste it below.");
+  }
+
+  function checkOnMap() {
+    const q = values.area_name.trim();
+    if (!q) {
+      toast.error("Please enter your area name first.");
+      return;
+    }
+    const url = q.startsWith("http")
+      ? q
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+    window.open(url, "_blank");
+  }
+
+  function handleAreaChange(val: string) {
+    setValues((v) => ({ ...v, area_name: val }));
+    const detected = parseCoordsFromInput(val);
+    if (detected) {
+      const fuzzed = fuzzCoordinates(detected.lat, detected.lng);
+      setCoords(fuzzed);
+    }
+  }
 
   function useMyLocation() {
     if (!navigator.geolocation) {
       toast.error("Your browser does not support location sharing.");
       return;
     }
+    setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords(fuzzCoordinates(pos.coords.latitude, pos.coords.longitude));
-        toast.success("Location set to your approximate area (rounded to ~1 km).");
+      async (pos) => {
+        setLocating(false);
+        const fuzzed = fuzzCoordinates(pos.coords.latitude, pos.coords.longitude);
+        setCoords(fuzzed);
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&addressdetails=1`,
+            { headers: { "Accept-Language": "en" } },
+          );
+          const data = await res.json();
+          const addr = data?.address || {};
+          const detectedArea =
+            addr.suburb || addr.neighbourhood || addr.city || addr.town || "Local Area";
+          setValues((v) => ({ ...v, area_name: detectedArea }));
+          toast.success(`Location set to ${detectedArea}`);
+        } catch {
+          toast.success("Location locked to your current device GPS.");
+        }
       },
-      () => toast.error("We couldn't read your location. Pick a spot on the map instead."),
+      () => {
+        setLocating(false);
+        toast.error("Could not read your GPS location.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   }
 
@@ -88,82 +148,122 @@ function RegisterPage() {
     }
   }
 
-  const field = (
-    name: keyof typeof values,
-    label: string,
-    props: React.InputHTMLAttributes<HTMLInputElement> = {},
-  ) => (
-    <div className="space-y-2">
-      <Label htmlFor={name}>{label}</Label>
-      <Input
-        id={name}
-        value={values[name]}
-        onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.value }))}
-        aria-invalid={Boolean(errors[name])}
-        aria-describedby={errors[name] ? `${name}-error` : undefined}
-        {...props}
-      />
-      {errors[name] && (
-        <p id={`${name}-error`} className="text-sm text-destructive">
-          {errors[name]}
-        </p>
-      )}
-    </div>
-  );
-
   return (
     <SiteLayout>
-      <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-2">
-        <div>
-          <h1 className="font-display text-3xl font-bold tracking-tight">Join ShareShelf</h1>
-          <p className="mt-2 text-muted-foreground">
-            Create an account with an email and a username. We never ask for a phone number, and your exact
-            address stays private — only a coarse area is ever shown.
-          </p>
-          <form onSubmit={onSubmit} noValidate className="mt-8 space-y-5 rounded-2xl border bg-card p-6 shadow-soft">
-            {field("username", "Username", { autoComplete: "username", maxLength: 30 })}
-            {field("email", "Email", { type: "email", autoComplete: "email", maxLength: 255 })}
-            {field("password", "Password", { type: "password", autoComplete: "new-password", maxLength: 128 })}
-            {field("area_name", "Your area", {
-              placeholder: "e.g. Gulshan-e-Iqbal, Karachi",
-              maxLength: 120,
-            })}
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Creating account…" : "Create account"}
-            </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Already a member?{" "}
-              <Link to="/login" className="font-semibold text-primary hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </form>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-semibold">Approximate location</h2>
-            <Button type="button" variant="secondary" size="sm" onClick={useMyLocation}>
-              <LocateFixed className="mr-2 size-4" aria-hidden="true" />
-              Use my location
-            </Button>
+      <div className="mx-auto max-w-xl">
+        <h1 className="font-display text-3xl font-bold tracking-tight">Join ShareShelf</h1>
+        <p className="mt-2 text-muted-foreground">
+          Create an account with an email and a username. Your exact address is never shared — only
+          your neighbourhood is shown for easy exchanges.
+        </p>
+        <form
+          onSubmit={onSubmit}
+          noValidate
+          className="mt-8 space-y-5 rounded-2xl border bg-card p-6 shadow-soft"
+        >
+          <div className="space-y-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              value={values.username}
+              autoComplete="username"
+              maxLength={30}
+              placeholder="e.g. hassan_99"
+              onChange={(e) => setValues((v) => ({ ...v, username: e.target.value }))}
+            />
+            {errors.username && <p className="text-sm text-destructive">{errors.username}</p>}
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Tap the map to set the neighbourhood you want to share within. Coordinates are rounded before they
-            are stored, so nobody can find your door.
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              maxLength={255}
+              placeholder="you@example.com"
+              onChange={(e) => setValues((v) => ({ ...v, email: e.target.value }))}
+            />
+            {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              maxLength={128}
+              onChange={(e) => setValues((v) => ({ ...v, password: e.target.value }))}
+            />
+            {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+          </div>
+
+          {/* --- Google Maps Unified Location Section --- */}
+          <div className="space-y-3 rounded-xl border bg-muted/40 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <Label htmlFor="area" className="text-sm font-semibold">
+                Your Area / Neighbourhood
+              </Label>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-xs text-primary hover:bg-primary/10"
+                  onClick={openGoogleMaps}
+                >
+                  <MapPin className="mr-1 size-3" />
+                  Open Google Maps
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  disabled={locating}
+                  onClick={useMyLocation}
+                >
+                  <LocateFixed className="mr-1 size-3" />
+                  {locating ? "Locating…" : "Use GPS"}
+                </Button>
+              </div>
+            </div>
+
+            <Input
+              id="area"
+              value={values.area_name}
+              placeholder="e.g. Model Town, Okara or Johar Town, Lahore"
+              maxLength={120}
+              onChange={(e) => handleAreaChange(e.target.value)}
+            />
+
+            <div className="flex items-center justify-between pt-0.5 text-xs text-muted-foreground">
+              <span>Neighbours use this area to discover nearby listings.</span>
+              {values.area_name.trim() && (
+                <button
+                  type="button"
+                  onClick={checkOnMap}
+                  className="inline-flex items-center gap-1 font-medium text-foreground underline hover:text-primary"
+                >
+                  Check on Map
+                  <ExternalLink className="size-3" />
+                </button>
+              )}
+            </div>
+            {errors.area_name && <p className="text-sm text-destructive">{errors.area_name}</p>}
+          </div>
+
+          <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+            {submitting ? "Creating account…" : "Create account"}
+          </Button>
+          <p className="text-center text-sm text-muted-foreground">
+            Already a member?{" "}
+            <Link to="/login" className="font-semibold text-primary hover:underline">
+              Sign in
+            </Link>
           </p>
-          <MapView
-            className="mt-4 h-[26rem]"
-            selectable
-            selected={coords}
-            center={coords}
-            onSelect={setCoords}
-            ariaLabel="Pick your approximate area on the map"
-          />
-          <p className="mt-3 text-xs text-muted-foreground">
-            Selected: {coords.lat.toFixed(3)}, {coords.lng.toFixed(3)} (≈1 km precision)
-          </p>
-        </div>
+        </form>
       </div>
     </SiteLayout>
   );

@@ -44,14 +44,18 @@ function MyRequestsPage() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <TransactionStatusBadge status={tx.status} />
-                  <h3 className="truncate font-semibold">{tx.item?.title ?? `Item #${tx.item_id}`}</h3>
+                  <h3 className="truncate font-semibold">
+                    {tx.item?.title ?? `Item #${tx.item_id}`}
+                  </h3>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Requested {formatDate(tx.created_at)}
                   {tx.owner_username ? ` · from ${tx.owner_username}` : ""}
                 </p>
                 {tx.pickup_pin && (
-                  <p className="mt-1 text-sm font-semibold text-primary">Pickup PIN: {tx.pickup_pin}</p>
+                  <p className="mt-1 text-sm font-semibold text-primary">
+                    Pickup PIN: {tx.pickup_pin}
+                  </p>
                 )}
               </div>
               <Button asChild size="sm" variant="secondary">

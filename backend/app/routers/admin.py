@@ -73,11 +73,36 @@ def remove_item(
 
 
 @router.get("/reports", response_model=list[ReportOut])
-def reports(db: Session = Depends(get_db), _: User = Depends(get_current_admin)) -> list[Report]:
-    return list(db.scalars(select(Report).order_by(Report.created_at.desc())).all())
-
+def reports(db: Session = Depends(get_db), _: User = Depends(get_current_admin)) -> list[ReportOut]:
+    rows = list(db.scalars(select(Report).order_by(Report.created_at.desc())).all())
+    output = []
+    for r in rows:
+        title = None
+        if r.reported_item_id:
+            item = db.get(Item, r.reported_item_id)
+            if item:
+                title = item.title
+        output.append(
+            ReportOut(
+                id=r.id,
+                reported_by=r.reported_by,
+                reported_item_id=r.reported_item_id,
+                reported_user_id=r.reported_user_id,
+                item_title=title,
+                reason=r.reason,
+                description=r.description,
+                status=r.status,
+                created_at=r.created_at,
+                reviewed_by=r.reviewed_by,
+                reviewed_at=r.reviewed_at,
+            )
+        )
+    return output
 
 @router.post("/reports/{report_id}/resolve", response_model=ReportOut)
+@router.patch("/reports/{report_id}/resolve", response_model=ReportOut)
+@router.post("/reports/{report_id}/review", response_model=ReportOut)
+@router.patch("/reports/{report_id}/review", response_model=ReportOut)
 def resolve_report(
     report_id: int,
     action: str = "Reviewed",
@@ -89,7 +114,25 @@ def resolve_report(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "That report does not exist.")
     if action not in ("Reviewed", "Dismissed"):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Unknown moderation action.")
-    report.status = action
+    report.status = "Reviewed"
+    report.reviewed_by = admin.id
+    report.reviewed_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(report)
+    return report
+
+
+@router.post("/reports/{report_id}/dismiss", response_model=ReportOut)
+@router.patch("/reports/{report_id}/dismiss", response_model=ReportOut)
+def dismiss_report_alias(
+    report_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin),
+) -> Report:
+    report = db.get(Report, report_id)
+    if report is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "That report does not exist.")
+    report.status = "Dismissed"
     report.reviewed_by = admin.id
     report.reviewed_at = datetime.now(timezone.utc)
     db.commit()

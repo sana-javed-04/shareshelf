@@ -26,7 +26,10 @@ export const Route = createFileRoute("/items/$id/edit")({
   head: () => ({
     meta: [
       { title: "Edit listing — ShareShelf" },
-      { name: "description", content: "Update the details, price and status of your ShareShelf listing." },
+      {
+        name: "description",
+        content: "Update the details, price and status of your ShareShelf listing.",
+      },
       { property: "og:title", content: "Edit listing — ShareShelf" },
       { property: "og:description", content: "Keep your listing accurate for neighbours." },
       { name: "robots", content: "noindex" },
@@ -95,11 +98,17 @@ function EditItemPage() {
 
   return (
     <SiteLayout>
-      <PageHeader title="Edit listing" description="Keep the details fresh so neighbours know what to expect." />
+      <PageHeader
+        title="Edit listing"
+        description="Keep the details fresh so neighbours know what to expect."
+      />
       {isLoading || !data ? (
         <RowsSkeleton rows={3} />
       ) : (
-        <form onSubmit={save} className="grid max-w-2xl gap-5 rounded-2xl border bg-card p-6 shadow-soft">
+        <form
+          onSubmit={save}
+          className="grid max-w-2xl gap-5 rounded-2xl border bg-card p-6 shadow-soft"
+        >
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} />

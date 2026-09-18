@@ -9,9 +9,9 @@ export function Footer() {
         <div className="md:col-span-2">
           <Logo />
           <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-            ShareShelf is a hyper-local shelf your neighbourhood shares. Rent what you need for a weekend,
-            donate what you have outgrown, and sell what deserves a second life — without ever handing over
-            your phone number.
+            ShareShelf is a hyper-local shelf your neighbourhood shares. Rent what you need for a
+            weekend, donate what you have outgrown, and sell what deserves a second life — without
+            ever handing over your phone number.
           </p>
           <ul className="mt-5 flex flex-wrap gap-4 text-xs font-medium text-muted-foreground">
             <li className="inline-flex items-center gap-1.5">

@@ -19,7 +19,10 @@ export const Route = createFileRoute("/transactions")({
   head: () => ({
     meta: [
       { title: "Transactions — ShareShelf" },
-      { name: "description", content: "Approve, hand over and close out your ShareShelf exchanges." },
+      {
+        name: "description",
+        content: "Approve, hand over and close out your ShareShelf exchanges.",
+      },
       { property: "og:title", content: "Transactions — ShareShelf" },
       { property: "og:description", content: "Manage incoming and outgoing item exchanges." },
       { name: "robots", content: "noindex" },
@@ -60,13 +63,17 @@ function TransactionRow({
           <h3 className="truncate font-semibold">{tx.item?.title ?? `Item #${tx.item_id}`}</h3>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          {role === "owner" ? `Requested by ${tx.borrower_username ?? "a neighbour"}` : `Owner: ${tx.owner_username ?? "neighbour"}`}
+          {role === "owner"
+            ? `Requested by ${tx.borrower_username ?? "a neighbour"}`
+            : `Owner: ${tx.owner_username ?? "neighbour"}`}
           {" · "}
           {formatDate(tx.created_at)}
           {tx.due_date ? ` · due ${formatDate(tx.due_date)}` : ""}
         </p>
         {tx.pickup_pin && (
-          <p className="mt-1 text-sm font-semibold text-primary">Your pickup PIN: {tx.pickup_pin}</p>
+          <p className="mt-1 text-sm font-semibold text-primary">
+            Your pickup PIN: {tx.pickup_pin}
+          </p>
         )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -93,13 +100,19 @@ function TransactionRow({
               className="h-9 w-32"
               aria-label="Pickup PIN"
             />
-            <Button size="sm" onClick={() => run.mutate(() => transactionService.verifyPin(tx.id, pin))}>
+            <Button
+              size="sm"
+              onClick={() => run.mutate(() => transactionService.verifyPin(tx.id, pin))}
+            >
               Verify
             </Button>
           </div>
         )}
         {role === "owner" && tx.status === "Active" && tx.pin_verified && (
-          <Button size="sm" onClick={() => run.mutate(() => transactionService.confirmReturn(tx.id))}>
+          <Button
+            size="sm"
+            onClick={() => run.mutate(() => transactionService.confirmReturn(tx.id))}
+          >
             Confirm return
           </Button>
         )}

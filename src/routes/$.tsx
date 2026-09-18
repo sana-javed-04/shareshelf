@@ -8,9 +8,15 @@ export const Route = createFileRoute("/$")({
   head: () => ({
     meta: [
       { title: "Page not found — ShareShelf" },
-      { name: "description", content: "This ShareShelf page does not exist. Head back to the shelf." },
+      {
+        name: "description",
+        content: "This ShareShelf page does not exist. Head back to the shelf.",
+      },
       { property: "og:title", content: "Page not found — ShareShelf" },
-      { property: "og:description", content: "The page you were looking for has moved or never existed." },
+      {
+        property: "og:description",
+        content: "The page you were looking for has moved or never existed.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),

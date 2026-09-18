@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { getToken } from "@/lib/api/client";
 import { authService, type RegisterPayload } from "@/services/authService";
 import type { User } from "@/lib/types";

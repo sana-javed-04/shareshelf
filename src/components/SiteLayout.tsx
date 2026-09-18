@@ -22,7 +22,9 @@ export function SiteLayout({
       </a>
       <Navbar />
       <main id="main" className={cn("flex-1", className)}>
-        <div className={cn("mx-auto w-full px-4 py-10 sm:px-6", wide ? "max-w-[110rem]" : "max-w-7xl")}>
+        <div
+          className={cn("mx-auto w-full px-4 py-10 sm:px-6", wide ? "max-w-[110rem]" : "max-w-7xl")}
+        >
           {children}
         </div>
       </main>

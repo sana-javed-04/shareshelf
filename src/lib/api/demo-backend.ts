@@ -252,7 +252,13 @@ function seed(): Db {
     transactions: [],
     messages,
     reports: [],
-    seq: { items: items.length, users: users.length, transactions: 0, messages: messages.length, reports: 0 },
+    seq: {
+      items: items.length,
+      users: users.length,
+      transactions: 0,
+      messages: messages.length,
+      reports: 0,
+    },
   };
 }
 
@@ -319,13 +325,15 @@ function requireUser(token: string | null): DbUser {
   const id = token?.startsWith("demo.") ? Number(token.slice(5)) : NaN;
   const user = d.users.find((u) => u.id === id);
   if (!user) throw new ApiError(401, "Your session has expired. Please sign in again.");
-  if (user.is_banned) throw new ApiError(403, "This account has been suspended by an administrator.");
+  if (user.is_banned)
+    throw new ApiError(403, "This account has been suspended by an administrator.");
   return user;
 }
 
 function requireAdmin(token: string | null): DbUser {
   const user = requireUser(token);
-  if (user.role !== "admin") throw new ApiError(403, "You do not have permission to perform this action.");
+  if (user.role !== "admin")
+    throw new ApiError(403, "You do not have permission to perform this action.");
   return user;
 }
 
@@ -413,7 +421,14 @@ function hydrateTransaction(t: DbTransaction, viewerId: number): Transaction {
 }
 
 function validateItemPayload(body: Record<string, unknown>) {
-  const required = ["title", "description", "category", "item_condition", "listing_type", "area_name"];
+  const required = [
+    "title",
+    "description",
+    "category",
+    "item_condition",
+    "listing_type",
+    "area_name",
+  ];
   for (const field of required) {
     if (!body[field] || String(body[field]).trim() === "") {
       throw new ApiError(422, `The field "${field.replace("_", " ")}" is required.`);
@@ -421,11 +436,14 @@ function validateItemPayload(body: Record<string, unknown>) {
   }
   const type = body.listing_type as string;
   const price = Number(body.price ?? 0);
-  if (type === "DONATE" && price !== 0) throw new ApiError(422, "Donated items must have a price of zero.");
-  if (type === "SELL" && !(price > 0)) throw new ApiError(422, "Selling requires a price greater than zero.");
+  if (type === "DONATE" && price !== 0)
+    throw new ApiError(422, "Donated items must have a price of zero.");
+  if (type === "SELL" && !(price > 0))
+    throw new ApiError(422, "Selling requires a price greater than zero.");
   if (type === "RENT") {
     if (!(price > 0)) throw new ApiError(422, "Renting requires a daily rental price.");
-    if (!Number(body.max_rental_days)) throw new ApiError(422, "Renting requires a maximum rental period.");
+    if (!Number(body.max_rental_days))
+      throw new ApiError(422, "Renting requires a maximum rental period.");
   }
 }
 
@@ -453,14 +471,18 @@ export async function demoRequest<T>(
   /* ---------------- auth ---------------- */
   if (key === "POST /auth/register") {
     const username = String(body?.username ?? "").trim();
-    const email = String(body?.email ?? "").trim().toLowerCase();
+    const email = String(body?.email ?? "")
+      .trim()
+      .toLowerCase();
     const password = String(body?.password ?? "");
     if (username.length < 3) throw new ApiError(422, "Username must be at least 3 characters.");
-    if (!/^\S+@\S+\.\S+$/.test(email)) throw new ApiError(422, "Please enter a valid email address.");
+    if (!/^\S+@\S+\.\S+$/.test(email))
+      throw new ApiError(422, "Please enter a valid email address.");
     if (password.length < 8) throw new ApiError(422, "Password must be at least 8 characters.");
     if (d.users.some((u) => u.username.toLowerCase() === username.toLowerCase()))
       throw new ApiError(409, "That username is already taken.");
-    if (d.users.some((u) => u.email === email)) throw new ApiError(409, "An account with that email already exists.");
+    if (d.users.some((u) => u.email === email))
+      throw new ApiError(409, "An account with that email already exists.");
     const user: DbUser = {
       id: nextId("users"),
       username,
@@ -476,18 +498,29 @@ export async function demoRequest<T>(
       updated_at: now(),
     };
     d.users.push(user);
-    return result({ access_token: `demo.${user.id}`, token_type: "bearer", user: publicUser(user) });
+    return result({
+      access_token: `demo.${user.id}`,
+      token_type: "bearer",
+      user: publicUser(user),
+    });
   }
 
   if (key === "POST /auth/login") {
-    const identifier = String(body?.username ?? "").trim().toLowerCase();
+    const identifier = String(body?.username ?? "")
+      .trim()
+      .toLowerCase();
     const user = d.users.find(
       (u) => u.username.toLowerCase() === identifier || u.email.toLowerCase() === identifier,
     );
     if (!user || !verify(String(body?.password ?? ""), user.password_hash))
       throw new ApiError(401, "Incorrect username or password.");
-    if (user.is_banned) throw new ApiError(403, "This account has been suspended by an administrator.");
-    return result({ access_token: `demo.${user.id}`, token_type: "bearer", user: publicUser(user) });
+    if (user.is_banned)
+      throw new ApiError(403, "This account has been suspended by an administrator.");
+    return result({
+      access_token: `demo.${user.id}`,
+      token_type: "bearer",
+      user: publicUser(user),
+    });
   }
 
   if (key === "POST /auth/logout") return result({ detail: "Signed out." });
@@ -509,7 +542,12 @@ export async function demoRequest<T>(
     return result(publicUser(user));
   }
 
-  if (segments[0] === "users" && segments.length === 2 && segments[1] !== "me" && method === "GET") {
+  if (
+    segments[0] === "users" &&
+    segments.length === 2 &&
+    segments[1] !== "me" &&
+    method === "GET"
+  ) {
     const owner = ownerPublic(Number(segments[1]));
     if (!owner) throw new ApiError(404, "That member does not exist.");
     return result(owner);
@@ -593,7 +631,8 @@ export async function demoRequest<T>(
       Object.assign(item, body, {
         listing_type: type,
         price: type === "DONATE" ? 0 : Number(body?.price ?? item.price),
-        max_rental_days: type === "RENT" ? Number(body?.max_rental_days ?? item.max_rental_days) : null,
+        max_rental_days:
+          type === "RENT" ? Number(body?.max_rental_days ?? item.max_rental_days) : null,
         updated_at: now(),
       });
       return result(withOwner(item));
@@ -602,7 +641,11 @@ export async function demoRequest<T>(
       const active = d.transactions.some(
         (t) => t.item_id === item.id && ["Pending", "Active"].includes(t.status),
       );
-      if (active) throw new ApiError(409, "This listing has an active request or transaction and cannot be deleted.");
+      if (active)
+        throw new ApiError(
+          409,
+          "This listing has an active request or transaction and cannot be deleted.",
+        );
       d.items = d.items.filter((i) => i.id !== item.id);
       return result({ detail: "Listing deleted." });
     }
@@ -611,7 +654,8 @@ export async function demoRequest<T>(
   if (segments[0] === "items" && segments[2] === "image" && method === "POST") {
     const user = requireUser(token);
     const item = findItem(Number(segments[1]));
-    if (item.owner_id !== user.id) throw new ApiError(403, "You can only manage your own listings.");
+    if (item.owner_id !== user.id)
+      throw new ApiError(403, "You can only manage your own listings.");
     item.image_path = String(body?.image_path ?? "");
     item.updated_at = now();
     return result(withOwner(item));
@@ -623,7 +667,11 @@ export async function demoRequest<T>(
     const item = findItem(Number(body?.item_id));
     if (item.owner_id === user.id) throw new ApiError(400, "You cannot request your own item.");
     if (item.status !== "Available") throw new ApiError(409, "This item is no longer available.");
-    if (d.transactions.some((t) => t.item_id === item.id && t.borrower_id === user.id && t.status === "Pending"))
+    if (
+      d.transactions.some(
+        (t) => t.item_id === item.id && t.borrower_id === user.id && t.status === "Pending",
+      )
+    )
       throw new ApiError(409, "You already have a pending request for this item.");
     const t: DbTransaction = {
       id: nextId("transactions"),
@@ -708,7 +756,8 @@ export async function demoRequest<T>(
       if (t.pin_verified) throw new ApiError(409, "This PIN has already been used.");
       if (t.status !== "Pending" || !t.pickup_pin_hash)
         throw new ApiError(409, "This request is not ready for handover.");
-      if (!verify(String(body?.pin ?? ""), t.pickup_pin_hash)) throw new ApiError(400, "Incorrect pickup PIN.");
+      if (!verify(String(body?.pin ?? ""), t.pickup_pin_hash))
+        throw new ApiError(400, "Incorrect pickup PIN.");
       t.pin_verified = true;
       t.pickup_pin_hash = null;
       t.pin_plain = null;
@@ -744,7 +793,8 @@ export async function demoRequest<T>(
     }
 
     if (action === "cancel") {
-      if (!isOwner && !isBorrower) throw new ApiError(403, "You do not have permission to perform this action.");
+      if (!isOwner && !isBorrower)
+        throw new ApiError(403, "You do not have permission to perform this action.");
       if (!["Pending", "Active"].includes(t.status))
         throw new ApiError(409, "This transaction can no longer be cancelled.");
       t.status = "Cancelled";
@@ -827,7 +877,8 @@ export async function demoRequest<T>(
     const user = requireUser(token);
     const msg = d.messages.find((m) => m.id === Number(segments[1]));
     if (!msg) throw new ApiError(404, "Message not found.");
-    if (msg.receiver_id !== user.id) throw new ApiError(403, "You do not have permission to perform this action.");
+    if (msg.receiver_id !== user.id)
+      throw new ApiError(403, "You do not have permission to perform this action.");
     msg.is_read = true;
     return result(msg);
   }

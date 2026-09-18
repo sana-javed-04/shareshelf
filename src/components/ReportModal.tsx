@@ -73,8 +73,8 @@ export function ReportModal({
         <DialogHeader>
           <DialogTitle>Report to moderators</DialogTitle>
           <DialogDescription>
-            Reports are private. Our team reviews every submission and never shares your identity with the
-            reported member.
+            Reports are private. Our team reviews every submission and never shares your identity
+            with the reported member.
           </DialogDescription>
         </DialogHeader>
         <fieldset className="space-y-3">

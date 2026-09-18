@@ -17,10 +17,14 @@ export const Route = createFileRoute("/users/$id")({
       { title: "Member profile — ShareShelf" },
       {
         name: "description",
-        content: "See a neighbour's public ShareShelf profile: approximate area, activity and open listings.",
+        content:
+          "See a neighbour's public ShareShelf profile: approximate area, activity and open listings.",
       },
       { property: "og:title", content: "Member profile — ShareShelf" },
-      { property: "og:description", content: "Public, privacy-safe profiles — no emails or exact addresses." },
+      {
+        property: "og:description",
+        content: "Public, privacy-safe profiles — no emails or exact addresses.",
+      },
       { property: "og:type", content: "profile" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -83,10 +87,12 @@ function UserProfilePage() {
             <MapPin className="size-4" aria-hidden="true" /> {user.area_name ?? "Area not shared"}
           </li>
           <li className="inline-flex items-center gap-2">
-            <CalendarDays className="size-4" aria-hidden="true" /> Joined {formatDate(user.created_at)}
+            <CalendarDays className="size-4" aria-hidden="true" /> Joined{" "}
+            {formatDate(user.created_at)}
           </li>
           <li className="inline-flex items-center gap-2">
-            <PackageCheck className="size-4" aria-hidden="true" /> {user.total_transactions} exchanges
+            <PackageCheck className="size-4" aria-hidden="true" /> {user.total_transactions}{" "}
+            exchanges
           </li>
         </ul>
       </div>

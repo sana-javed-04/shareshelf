@@ -63,7 +63,11 @@ function DashboardPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Active listings" value={data.active_listings} Icon={Boxes} />
           <StatCard label="Pending requests" value={data.pending_requests} Icon={Inbox} />
-          <StatCard label="Active transactions" value={data.active_transactions} Icon={PackageCheck} />
+          <StatCard
+            label="Active transactions"
+            value={data.active_transactions}
+            Icon={PackageCheck}
+          />
           <StatCard label="Unread messages" value={data.unread_messages} Icon={MessageSquare} />
         </div>
       )}

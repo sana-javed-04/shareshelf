@@ -10,4 +10,7 @@ export const reportService = {
   }) {
     return api.post<Report>("/reports", payload as Record<string, unknown>);
   },
+  myReports() {
+    return api.get<Report[]>("/reports/my");
+  },
 };

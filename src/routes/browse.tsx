@@ -1,7 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { LayoutGrid, List, Map as MapIcon, Search, SlidersHorizontal, X } from "lucide-react";
+import {
+  ExternalLink,
+  LayoutGrid,
+  List,
+  LocateFixed,
+  MapPin,
+  Map as MapIcon,
+  RotateCcw,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { SiteLayout, PageHeader } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +84,29 @@ const INITIAL: Filters = {
   sort: "newest",
 };
 
+// Common landmarks fallback coordinates
+const LOCAL_LANDMARKS: Record<string, { lat: number; lng: number }> = {
+  dhq: { lat: 30.8122, lng: 73.4475 },
+  hospital: { lat: 30.8122, lng: 73.4475 },
+  okara: { lat: 30.8138, lng: 73.4534 },
+  sabri: { lat: 30.8095, lng: 73.448 },
+  samadpura: { lat: 30.811, lng: 73.451 },
+  campus: { lat: 30.835, lng: 73.438 },
+  lahore: { lat: 31.5204, lng: 74.3587 },
+};
+
+function parseCoords(text: string): { lat: number; lng: number } | null {
+  const match = text.match(/(@|q=|\?ll=)(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (match) {
+    return { lat: parseFloat(match[2]), lng: parseFloat(match[3]) };
+  }
+  const rawMatch = text.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
+  if (rawMatch) {
+    return { lat: parseFloat(rawMatch[1]), lng: parseFloat(rawMatch[2]) };
+  }
+  return null;
+}
+
 function BrowsePage() {
   const { user } = useAuth();
   const [filters, setFilters] = useState<Filters>(INITIAL);
@@ -80,21 +114,82 @@ function BrowsePage() {
   const [view, setView] = useState<"grid" | "list" | "map">("grid");
   const [showFilters, setShowFilters] = useState(false);
 
-  const center = useMemo(
+  // Dynamic Center State
+  const [center, setCenter] = useState<{ lat: number; lng: number }>(
     () =>
       user?.latitude != null && user?.longitude != null
         ? { lat: user.latitude, lng: user.longitude }
-        : DEFAULT_CENTER,
-    [user],
+        : { lat: 30.8138, lng: 73.4534 }, // Default to local region
   );
+
+  useEffect(() => {
+    if (user?.area_name) {
+      setFilters((f) => (f.area ? f : { ...f, area: user.area_name || "" }));
+    }
+    if (user?.latitude != null && user?.longitude != null) {
+      setCenter({ lat: user.latitude, lng: user.longitude });
+    }
+  }, [user?.area_name, user?.latitude, user?.longitude]);
+
+  // Update center when area input changes
+  useEffect(() => {
+    const raw = filters.area.trim();
+    if (!raw) return;
+
+    // 1. Coordinates extracted from Google Maps text / link
+    const parsed = parseCoords(raw);
+    if (parsed) {
+      setCenter(parsed);
+      return;
+    }
+
+    // 2. Known local spots fast match
+    const lower = raw.toLowerCase();
+    for (const [key, coords] of Object.entries(LOCAL_LANDMARKS)) {
+      if (lower.includes(key)) {
+        setCenter(coords);
+        return;
+      }
+    }
+
+    // 3. Online Geocoder fallback
+    const timer = setTimeout(() => {
+      fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(raw)}&limit=1`,
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data[0]) {
+            setCenter({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+          }
+        })
+        .catch(() => {});
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filters.area]);
+
+  function useMyLocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      setCenter(coords);
+      setFilters((f) => ({ ...f, area: "Current Location (GPS)" }));
+    });
+  }
 
   const query: ItemQuery = {
     q: filters.q || undefined,
-    listing_type: filters.listing_type === ANY ? undefined : (filters.listing_type as ItemQuery["listing_type"]),
+    listing_type:
+      filters.listing_type === ANY
+        ? undefined
+        : (filters.listing_type as ItemQuery["listing_type"]),
     category: filters.category === ANY ? undefined : (filters.category as ItemQuery["category"]),
     item_condition:
-      filters.item_condition === ANY ? undefined : (filters.item_condition as ItemQuery["item_condition"]),
-    area: filters.area || undefined,
+      filters.item_condition === ANY
+        ? undefined
+        : (filters.item_condition as ItemQuery["item_condition"]),
+    area: (!center.lat || !center.lng) && filters.area.trim() ? filters.area.trim() : undefined,
     max_price: filters.maxPrice > 0 ? filters.maxPrice : undefined,
     lat: center.lat,
     lng: center.lng,
@@ -182,15 +277,77 @@ function BrowsePage() {
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="filter-area">Area contains</Label>
+      {/* --- Area / City Box --- */}
+      <div className="space-y-2 rounded-xl border bg-muted/40 p-3.5">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="filter-area" className="text-sm font-semibold">
+            Area / City
+          </Label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={useMyLocation}
+              title="Use current GPS"
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+            >
+              <LocateFixed className="size-3" />
+              GPS
+            </button>
+            <button
+              type="button"
+              onClick={() => window.open("https://www.google.com/maps", "_blank")}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+            >
+              <MapPin className="size-3" />
+              Maps
+            </button>
+          </div>
+        </div>
+
         <Input
           id="filter-area"
           value={filters.area}
-          maxLength={80}
-          placeholder="e.g. Clifton"
+          maxLength={100}
+          placeholder="e.g. DHQ Hospital, Okara"
           onChange={(e) => update("area", e.target.value)}
         />
+
+        <div className="flex items-center justify-between pt-1">
+          {user?.area_name && filters.area.toLowerCase() !== user.area_name.toLowerCase() ? (
+            <button
+              type="button"
+              onClick={() => {
+                update("area", user.area_name || "");
+                if (user.latitude != null && user.longitude != null) {
+                  setCenter({ lat: user.latitude, lng: user.longitude });
+                }
+              }}
+              className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground underline"
+            >
+              <RotateCcw className="size-2.5" />
+              Reset ({user.area_name})
+            </button>
+          ) : (
+            <span className="text-[11px] text-muted-foreground">Active Center</span>
+          )}
+
+          {filters.area.trim() && (
+            <button
+              type="button"
+              onClick={() => {
+                const q = filters.area.trim();
+                const url = q.startsWith("http")
+                  ? q
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+                window.open(url, "_blank");
+              }}
+              className="inline-flex items-center gap-0.5 text-[11px] font-medium text-foreground underline hover:text-primary"
+            >
+              Check on Map
+              <ExternalLink className="size-2.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -207,6 +364,7 @@ function BrowsePage() {
         />
       </div>
 
+      {/* --- Radius Buttons --- */}
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium">Distance from your area</legend>
         <div className="flex flex-wrap gap-2">
@@ -230,11 +388,6 @@ function BrowsePage() {
             </Button>
           ))}
         </div>
-        {!user && (
-          <p className="text-xs text-muted-foreground">
-            Sign in to filter around your own saved area — distances currently use the city centre.
-          </p>
-        )}
       </fieldset>
 
       <Button
@@ -242,7 +395,10 @@ function BrowsePage() {
         variant="ghost"
         className="w-full"
         onClick={() => {
-          setFilters(INITIAL);
+          setFilters({ ...INITIAL, area: user?.area_name ?? "" });
+          if (user?.latitude != null && user?.longitude != null) {
+            setCenter({ lat: user.latitude, lng: user.longitude });
+          }
           setPage(1);
         }}
       >
@@ -276,7 +432,7 @@ function BrowsePage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={filters.sort} onValueChange={(v) => update("sort", v as Filters["sort"])}>
-            <SelectTrigger className="w-[190px]" aria-label="Sort listings">
+            <SelectTrigger className="w-47.5" aria-label="Sort listings">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -288,11 +444,13 @@ function BrowsePage() {
             </SelectContent>
           </Select>
           <div className="flex rounded-lg border p-1" role="group" aria-label="Change results view">
-            {([
-              { key: "grid", Icon: LayoutGrid, label: "Grid view" },
-              { key: "list", Icon: List, label: "List view" },
-              { key: "map", Icon: MapIcon, label: "Map view" },
-            ] as const).map(({ key, Icon, label }) => (
+            {(
+              [
+                { key: "grid", Icon: LayoutGrid, label: "Grid view" },
+                { key: "list", Icon: List, label: "List view" },
+                { key: "map", Icon: MapIcon, label: "Map view" },
+              ] as const
+            ).map(({ key, Icon, label }) => (
               <Button
                 key={key}
                 size="icon"
@@ -305,7 +463,11 @@ function BrowsePage() {
               </Button>
             ))}
           </div>
-          <Button variant="secondary" className="lg:hidden" onClick={() => setShowFilters((s) => !s)}>
+          <Button
+            variant="secondary"
+            className="lg:hidden"
+            onClick={() => setShowFilters((s) => !s)}
+          >
             <SlidersHorizontal className="mr-2 size-4" aria-hidden="true" />
             Filters{activeCount ? ` (${activeCount})` : ""}
           </Button>
@@ -332,7 +494,10 @@ function BrowsePage() {
               action={
                 <Button
                   onClick={() => {
-                    setFilters(INITIAL);
+                    setFilters({ ...INITIAL, area: user?.area_name ?? "" });
+                    if (user?.latitude != null && user?.longitude != null) {
+                      setCenter({ lat: user.latitude, lng: user.longitude });
+                    }
                     setPage(1);
                   }}
                 >
@@ -342,7 +507,7 @@ function BrowsePage() {
             />
           ) : view === "map" ? (
             <MapView
-              className="h-[34rem]"
+              className="h-136"
               points={itemsToPoints(results)}
               center={center}
               radiusKm={filters.radius || undefined}
@@ -363,13 +528,21 @@ function BrowsePage() {
 
           {view !== "map" && totalPages > 1 && (
             <nav className="mt-10 flex items-center justify-center gap-3" aria-label="Pagination">
-              <Button variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+              <Button
+                variant="secondary"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
                 Previous
               </Button>
               <span className="text-sm text-muted-foreground">
                 Page {page} of {totalPages}
               </span>
-              <Button variant="secondary" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+              <Button
+                variant="secondary"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
                 Next
               </Button>
             </nav>

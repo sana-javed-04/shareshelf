@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { ExternalLink, Trash2 } from "lucide-react";
 import { PageHeader, SiteLayout } from "@/components/SiteLayout";
 import { RequireAuth } from "@/components/RequireAuth";
 import { Button } from "@/components/ui/button";
@@ -38,11 +39,19 @@ function AdminPage() {
   const act = useMutation({
     mutationFn: (fn: () => Promise<unknown>) => fn(),
     onSuccess: () => {
-      toast.success("Done.");
+      toast.success("Action completed.");
       void queryClient.invalidateQueries({ queryKey: ["admin"] });
     },
     onError: (error) => toast.error(errorMessage(error)),
   });
+
+  // Helper: item remove karein aur report resolve karein
+  const handleDeleteReportedItem = (itemId: number, reportId: number) => {
+    act.mutate(async () => {
+      await adminService.removeItem(itemId);
+      await adminService.reviewReport(reportId);
+    });
+  };
 
   return (
     <SiteLayout wide>
@@ -82,30 +91,80 @@ function AdminPage() {
               {reports.data.map((r) => (
                 <div
                   key={r.id}
-                  className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-4 rounded-xl border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div>
+                  <div className="space-y-1">
                     <p className="font-semibold">
-                      {r.reason} · <span className="text-muted-foreground">{r.status}</span>
+                      {r.reason} ·{" "}
+                      <span
+                        className={
+                          r.status === "Reviewed"
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : r.status === "Dismissed"
+                              ? "text-muted-foreground"
+                              : "text-amber-600 dark:text-amber-400 font-medium"
+                        }
+                      >
+                        {r.status}
+                      </span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {r.description ?? "No extra details"} · {formatDate(r.created_at)}
+                      {r.description ? `"${r.description}" · ` : ""}
+                      Reported {formatDate(r.created_at)}
                     </p>
+
+                    {r.reported_item_id && (
+                      <div className="flex items-center gap-2 pt-1 text-xs">
+                        <span className="font-medium text-foreground">Target item:</span>
+                        <span>{r.item_title ?? `#${r.reported_item_id}`}</span>
+                      </div>
+                    )}
                   </div>
-                  {r.status === "Pending" && (
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => act.mutate(() => adminService.reviewReport(r.id))}>
-                        Mark reviewed
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {r.reported_item_id && (
+                      <Button size="sm" variant="outline" asChild>
+                        <a
+                          href={`/items/${r.reported_item_id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1.5"
+                        >
+                          <ExternalLink className="size-3.5" />
+                          View Listing
+                        </a>
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => act.mutate(() => adminService.dismissReport(r.id))}
-                      >
-                        Dismiss
-                      </Button>
-                    </div>
-                  )}
+                    )}
+
+                    {r.status === "Pending" && (
+                      <>
+                        {r.reported_item_id && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="flex items-center gap-1.5"
+                            onClick={() => handleDeleteReportedItem(r.reported_item_id!, r.id)}
+                          >
+                            <Trash2 className="size-3.5" />
+                            Delete Listing
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          onClick={() => act.mutate(() => adminService.reviewReport(r.id))}
+                        >
+                          Mark reviewed
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => act.mutate(() => adminService.dismissReport(r.id))}
+                        >
+                          Dismiss
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -126,7 +185,8 @@ function AdminPage() {
                 >
                   <div>
                     <p className="font-semibold">
-                      {u.username} {u.role === "admin" && <span className="text-primary">· admin</span>}
+                      {u.username}{" "}
+                      {u.role === "admin" && <span className="text-primary">· admin</span>}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {u.area_name ?? "Unknown area"} · joined {formatDate(u.created_at)}

@@ -2,7 +2,16 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useState } from "react";
-import { CalendarClock, MapPin, MessageSquare, Pencil, ShieldCheck, Trash2, UserRound } from "lucide-react";
+import {
+  CalendarClock,
+  ExternalLink,
+  MapPin,
+  MessageSquare,
+  Pencil,
+  ShieldCheck,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 import { SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,7 +19,6 @@ import { ItemThumb } from "@/components/ItemCard";
 import { ListingTypeBadge, StatusBadge } from "@/components/StatusBadge";
 import { ReportModal } from "@/components/ReportModal";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import MapView from "@/components/MapView";
 import { EmptyState } from "@/components/EmptyState";
 import { itemService } from "@/services/itemService";
 import { transactionService } from "@/services/transactionService";
@@ -24,7 +32,7 @@ export const Route = createFileRoute("/items/$id")({
       { title: "Listing details — ShareShelf" },
       {
         name: "description",
-        content: "See condition, approximate location and rental terms for this ShareShelf listing.",
+        content: "See condition, location and terms for this ShareShelf listing.",
       },
       { property: "og:title", content: "Listing details — ShareShelf" },
       {
@@ -44,7 +52,11 @@ function ItemDetailPage() {
   const queryClient = useQueryClient();
   const [requesting, setRequesting] = useState(false);
 
-  const { data: item, isLoading, isError } = useQuery({
+  const {
+    data: item,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["item", itemId],
     queryFn: () => itemService.get(itemId),
     enabled: Number.isFinite(itemId),
@@ -84,6 +96,16 @@ function ItemDetailPage() {
   const isOwner = user?.id === item.owner_id;
   const canRequest = !isOwner && item.status === "Available";
   const distance = formatDistance(item.distance_km);
+
+  // Parse clean location and Google Maps URL
+  const rawLocation = item.area_name || "Local Area";
+  const [cleanAreaName, rawMapLink] = rawLocation.includes("||")
+    ? rawLocation.split("||").map((s) => s.trim())
+    : [rawLocation.trim(), null];
+
+  const targetMapUrl =
+    rawMapLink ||
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAreaName)}`;
 
   async function requestItem() {
     if (!user) {
@@ -126,13 +148,15 @@ function ItemDetailPage() {
 
       <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <div>
-          <div className="h-80 overflow-hidden rounded-2xl border sm:h-[26rem]">
+          <div className="h-80 overflow-hidden rounded-2xl border sm:h-104">
             <ItemThumb item={item} />
           </div>
 
           <div className="mt-8">
             <h2 className="font-display text-xl font-semibold">About this item</h2>
-            <p className="mt-3 whitespace-pre-line leading-relaxed text-muted-foreground">{item.description}</p>
+            <p className="mt-3 whitespace-pre-line leading-relaxed text-muted-foreground">
+              {item.description}
+            </p>
           </div>
 
           <dl className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -154,32 +178,30 @@ function ItemDetailPage() {
             ))}
           </dl>
 
-          <div className="mt-8">
-            <h2 className="font-display text-xl font-semibold">Approximate location</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              ShareShelf only ever shows a coarse area — arrange the exact meeting point in chat.
+          {/* Clean Pickup Location Box (Without Buggy Leaflet Map) */}
+          <div className="mt-8 rounded-2xl border bg-card p-5 shadow-soft">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="space-y-1">
+                <h2 className="font-display text-lg font-semibold">Pickup Location</h2>
+                <p className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+                  <MapPin className="size-4 shrink-0 text-primary" />
+                  {cleanAreaName}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => window.open(targetMapUrl, "_blank")}
+              >
+                <ExternalLink className="size-3.5" />
+                Open in Google Maps
+              </Button>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Arrange exact meeting or doorstep handover details with the owner in chat.
             </p>
-            <MapView
-              className="mt-4"
-              center={
-                item.latitude != null && item.longitude != null
-                  ? { lat: item.latitude, lng: item.longitude }
-                  : undefined
-              }
-              points={
-                item.latitude != null && item.longitude != null
-                  ? [
-                      {
-                        id: item.id,
-                        lat: item.latitude,
-                        lng: item.longitude,
-                        title: item.title,
-                        subtitle: item.area_name,
-                      },
-                    ]
-                  : []
-              }
-            />
           </div>
         </div>
 
@@ -193,11 +215,21 @@ function ItemDetailPage() {
             <p className="mt-2 font-display text-2xl font-bold text-primary">
               {formatPrice(item.price, item.listing_type)}
             </p>
-            <p className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-              <MapPin className="size-4" aria-hidden="true" />
-              {item.area_name}
-              {distance && <span className="font-medium text-foreground/70">· {distance}</span>}
-            </p>
+
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                <MapPin className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                <span className="font-medium text-foreground">{cleanAreaName}</span>
+                {distance && <span className="text-muted-foreground">· {distance}</span>}
+              </p>
+              <button
+                type="button"
+                onClick={() => window.open(targetMapUrl, "_blank")}
+                className="text-xs font-semibold text-primary underline hover:text-primary/80"
+              >
+                Directions
+              </button>
+            </div>
 
             <div className="mt-6 space-y-3">
               {isOwner ? (
@@ -224,7 +256,11 @@ function ItemDetailPage() {
                 </>
               ) : (
                 <>
-                  <Button className="w-full" disabled={!canRequest || requesting} onClick={requestItem}>
+                  <Button
+                    className="w-full"
+                    disabled={!canRequest || requesting}
+                    onClick={requestItem}
+                  >
                     {requesting
                       ? "Sending request…"
                       : item.status !== "Available"
@@ -236,10 +272,7 @@ function ItemDetailPage() {
                             : "Request to buy"}
                   </Button>
                   <Button asChild variant="secondary" className="w-full">
-                    <Link
-                      to="/chat"
-                      search={{ item: item.id, partner: item.owner_id }}
-                    >
+                    <Link to="/chat" search={{ item: item.id, partner: item.owner_id }}>
                       <MessageSquare className="mr-2 size-4" aria-hidden="true" />
                       Message the owner
                     </Link>
@@ -250,13 +283,15 @@ function ItemDetailPage() {
 
             <p className="mt-5 flex items-start gap-2 rounded-xl bg-secondary/60 p-3 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-              Approved requests generate a one-time pickup PIN. Verify it at handover — never share contact
-              details outside ShareShelf.
+              Approved requests generate a one-time pickup PIN. Verify it at handover — never share
+              contact details outside ShareShelf.
             </p>
           </div>
 
           <div className="mt-6 rounded-2xl border bg-card p-6">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Listed by</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Listed by
+            </h2>
             <div className="mt-3 flex items-center gap-3">
               <span className="grid size-11 place-items-center rounded-full bg-primary/10 text-primary">
                 <UserRound className="size-5" aria-hidden="true" />
@@ -264,8 +299,8 @@ function ItemDetailPage() {
               <div>
                 <p className="font-semibold">{item.owner?.username ?? "ShareShelf member"}</p>
                 <p className="text-xs text-muted-foreground">
-                  {item.owner?.area_name ?? item.area_name} · {item.owner?.total_transactions ?? 0} completed
-                  exchanges
+                  {item.owner?.area_name ?? cleanAreaName} · {item.owner?.total_transactions ?? 0}{" "}
+                  completed exchanges
                 </p>
               </div>
             </div>

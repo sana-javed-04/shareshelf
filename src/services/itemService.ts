@@ -48,7 +48,8 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 export function validateImage(file: File): string | null {
   if (!ALLOWED_TYPES.includes(file.type)) return "Please upload a JPG, PNG, WEBP or GIF image.";
-  if (file.size > MAX_IMAGE_MB * 1024 * 1024) return `Image must be smaller than ${MAX_IMAGE_MB} MB.`;
+  if (file.size > MAX_IMAGE_MB * 1024 * 1024)
+    return `Image must be smaller than ${MAX_IMAGE_MB} MB.`;
   return null;
 }
 

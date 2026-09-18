@@ -3,7 +3,8 @@ export type ListingType = "RENT" | "DONATE" | "SELL";
 export type ItemStatus = "Available" | "Reserved" | "Rented" | "Sold";
 export type Category = "Books" | "Electronics" | "Tools" | "Fashion" | "Home" | "Other";
 export type Condition = "Brand New" | "Like New" | "Good" | "Fair";
-export type TransactionStatus = "Pending" | "Active" | "Returned" | "Completed" | "Cancelled" | "Rejected";
+export type TransactionStatus =
+  "Pending" | "Active" | "Returned" | "Completed" | "Cancelled" | "Rejected";
 export type ReportStatus = "Pending" | "Reviewed" | "Dismissed";
 
 export const CATEGORIES: Category[] = ["Books", "Electronics", "Tools", "Fashion", "Home", "Other"];
@@ -110,6 +111,7 @@ export interface Report {
   reported_by_username?: string;
   reported_user_id: number | null;
   reported_item_id: number | null;
+  item_title?: string | null;
   reason: string;
   description: string | null;
   status: ReportStatus;

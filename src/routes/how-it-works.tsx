@@ -1,5 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { KeyRound, MessagesSquare, PackageSearch, PlusCircle, RotateCcw, ShieldCheck } from "lucide-react";
+import {
+  KeyRound,
+  MessagesSquare,
+  PackageSearch,
+  PlusCircle,
+  RotateCcw,
+  ShieldCheck,
+} from "lucide-react";
 import { PageHeader, SiteLayout } from "@/components/SiteLayout";
 import { Button } from "@/components/ui/button";
 
@@ -15,7 +22,8 @@ export const Route = createFileRoute("/how-it-works")({
       { property: "og:title", content: "How ShareShelf works" },
       {
         property: "og:description",
-        content: "A five-step, privacy-first flow for renting, donating and reselling with neighbours.",
+        content:
+          "A five-step, privacy-first flow for renting, donating and reselling with neighbours.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -80,8 +88,8 @@ function HowItWorksPage() {
           </span>
           <h2 className="mt-4 text-lg font-semibold">Privacy by default</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Locations are coarsened to roughly a one-kilometre grid, emails stay private and moderators review
-            every report.
+            Locations are coarsened to roughly a one-kilometre grid, emails stay private and
+            moderators review every report.
           </p>
           <Button asChild variant="secondary" size="sm" className="mt-4">
             <Link to="/safety">Read the safety guide</Link>
