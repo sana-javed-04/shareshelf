@@ -37,6 +37,7 @@ app = FastAPI(
 
 # CORS configuration for both Localhost and Cloud Frontend (Vercel)
 origins = [
+    "*",  # Vercel aur kisi bhi public frontend ko allow karne ke liye
     "http://localhost:8080",
     "http://127.0.0.1:8080",
     "http://localhost:5173",
@@ -75,3 +76,8 @@ app.include_router(reviews.router)
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/")
+def root():
+    return {"message": "ShareShelf API is running"}
