@@ -102,60 +102,55 @@ function Home() {
   const heroItems = data?.results?.slice(0, 4) ?? [];
 
   return (
-    <SiteLayout className="pt-0 overflow-x-hidden">
+    <SiteLayout className="w-full max-w-full overflow-x-hidden p-0">
       {/* Hero Section */}
-      <section className="relative w-full overflow-hidden px-3 pb-12 pt-6 sm:px-6 sm:pb-20 sm:pt-16">
+      <section className="relative w-full overflow-hidden px-4 pb-12 pt-6 sm:px-6 sm:pb-20 sm:pt-16">
         <div className="hero-glow pointer-events-none absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-8 lg:grid lg:grid-cols-[1.1fr_0.9fr]">
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full"
+            className="w-full max-w-full min-w-0"
           >
-            <span className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur">
-              <Lock className="size-3.5 text-primary" aria-hidden="true" />
-              Privacy-preserving · Hyper-local
+            <span className="inline-flex items-center gap-1.5 rounded-full border bg-card/70 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur">
+              <Lock className="size-3.5 text-primary shrink-0" aria-hidden="true" />
+              <span>Privacy-preserving · Hyper-local</span>
             </span>
 
-            <h1 className="mt-4 font-display text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl wrap-break-word">
+            <h1 className="mt-4 font-display text-2xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl wrap-break-words">
               Your neighbourhood already owns{" "}
               <span className="text-primary block sm:inline">everything you need.</span>
             </h1>
 
-            <p className="mt-4 max-w-xl text-sm sm:text-lg text-muted-foreground leading-relaxed">
+            <p className="mt-4 w-full max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-lg wrap-break-words">
               ShareShelf lets people in the same street, campus or town rent, donate and resell
               things to each other — without ever handing over a phone number or an exact address.
             </p>
 
-            <div className="mt-6 flex flex-wrap gap-2.5 sm:gap-3">
-              <Button asChild size="default" className="sm:h-11 sm:px-6 text-sm">
+            <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:items-center">
+              <Button asChild size="default" className="w-full sm:w-auto">
                 <Link to="/browse">
                   Browse nearby items
                   <ArrowRight className="ml-1.5 size-4" aria-hidden="true" />
                 </Link>
               </Button>
-              <Button
-                asChild
-                size="default"
-                variant="secondary"
-                className="sm:h-11 sm:px-6 text-sm"
-              >
+              <Button asChild size="default" variant="secondary" className="w-full sm:w-auto">
                 <Link to="/post-item">Post something</Link>
               </Button>
             </div>
 
-            <dl className="mt-8 grid grid-cols-3 gap-2 sm:gap-6 border-t pt-6 sm:border-0 sm:pt-0">
+            <dl className="mt-8 grid grid-cols-3 gap-2 border-t pt-6 sm:gap-6 sm:border-0 sm:pt-0">
               {[
                 { k: "3 ways", v: "Rent · Donate · Sell" },
-                { k: "0", v: "Phone numbers shared" },
-                { k: "1 km", v: "Location precision" },
+                { k: "0", v: "Phone numbers" },
+                { k: "1 km", v: "Precision" },
               ].map((s) => (
                 <div key={s.k} className="min-w-0">
-                  <dt className="font-display text-lg sm:text-2xl font-bold text-primary truncate">
+                  <dt className="font-display text-base font-bold text-primary sm:text-2xl truncate">
                     {s.k}
                   </dt>
-                  <dd className="text-[11px] sm:text-xs text-muted-foreground truncate">{s.v}</dd>
+                  <dd className="text-[11px] text-muted-foreground sm:text-xs truncate">{s.v}</dd>
                 </div>
               ))}
             </dl>
@@ -165,11 +160,11 @@ function Home() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full"
+            className="relative w-full max-w-full min-w-0"
           >
-            <div className="surface-gradient rounded-2xl sm:rounded-3xl border p-4 sm:p-6 shadow-soft">
+            <div className="surface-gradient w-full rounded-2xl border p-4 shadow-soft sm:rounded-3xl sm:p-6">
               <div className="flex items-center justify-between">
-                <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground sm:text-xs">
                   On the shelf near you
                 </p>
                 <Link to="/browse" className="text-xs font-medium text-primary hover:underline">
@@ -188,13 +183,13 @@ function Home() {
                     const cleanArea = rawArea.split("||")[0].split("http")[0].trim() || "Nearby";
 
                     return (
-                      <li key={item.id}>
+                      <li key={item.id} className="min-w-0">
                         <a
                           href={`/items/${item.id}`}
-                          className="group flex items-center justify-between gap-2.5 rounded-xl border bg-card/80 px-3.5 py-2.5 backdrop-blur transition-colors hover:border-primary/40 hover:bg-card"
+                          className="group flex items-center justify-between gap-2.5 rounded-xl border bg-card/80 px-3 py-2.5 backdrop-blur transition-colors hover:border-primary/40 hover:bg-card"
                         >
                           <div className="min-w-0 flex-1">
-                            <span className="block truncate text-xs sm:text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                            <span className="block truncate text-xs font-semibold text-foreground group-hover:text-primary transition-colors sm:text-sm">
                               {item.title}
                             </span>
                             <span className="block truncate text-[11px] text-muted-foreground mt-0.5">
@@ -203,7 +198,7 @@ function Home() {
                           </div>
 
                           <div className="shrink-0 text-right">
-                            <span className="inline-block max-w-28 sm:max-w-32.5 truncate text-[11px] sm:text-xs font-medium text-primary">
+                            <span className="inline-block max-w-24 truncate text-[11px] font-medium text-primary sm:max-w-32 sm:text-xs">
                               {item.distance_km != null
                                 ? formatDistance(item.distance_km)
                                 : cleanArea}
@@ -225,16 +220,16 @@ function Home() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="scroll-mt-24 py-12 sm:py-16">
-        <div className="mx-auto max-w-2xl text-center px-4">
+      <section id="how-it-works" className="scroll-mt-24 w-full px-4 py-12 sm:py-16">
+        <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-display text-2xl font-bold tracking-tight sm:text-4xl">
             How ShareShelf works
           </h2>
-          <p className="mt-2 text-sm sm:text-base text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
             Four steps from “I need this for a weekend” to a confirmed, privacy-safe handover.
           </p>
         </div>
-        <ol className="mt-8 sm:mt-12 grid gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ol className="mt-8 grid gap-4 sm:grid-cols-2 sm:mt-12 lg:grid-cols-4">
           {STEPS.map((step, i) => (
             <motion.li
               key={step.title}
@@ -244,26 +239,26 @@ function Home() {
               transition={{ duration: 0.35, delay: i * 0.06 }}
               className="card-lift rounded-2xl border bg-card p-5 sm:p-6"
             >
-              <span className="grid size-10 sm:size-11 place-items-center rounded-xl bg-primary/10 text-primary">
+              <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary sm:size-11">
                 <step.icon className="size-5" aria-hidden="true" />
               </span>
-              <h3 className="mt-4 text-sm sm:text-base font-semibold">
+              <h3 className="mt-4 text-sm font-semibold sm:text-base">
                 {i + 1}. {step.title}
               </h3>
-              <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground">{step.body}</p>
+              <p className="mt-1.5 text-xs text-muted-foreground sm:text-sm">{step.body}</p>
             </motion.li>
           ))}
         </ol>
       </section>
 
       {/* Fresh on the shelf */}
-      <section className="py-6 px-4">
+      <section className="w-full px-4 py-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
               Fresh on the shelf
             </h2>
-            <p className="mt-1 text-xs sm:text-base text-muted-foreground">
+            <p className="mt-1 text-xs text-muted-foreground sm:text-base">
               The newest listings from members around you.
             </p>
           </div>
@@ -275,7 +270,7 @@ function Home() {
           {isLoading ? (
             <ItemGridSkeleton count={6} />
           ) : data && data.results.length > 0 ? (
-            <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
               {data.results.map((item) => (
                 <ItemCard key={item.id} item={item} />
               ))}
@@ -295,13 +290,13 @@ function Home() {
       </section>
 
       {/* Values */}
-      <section className="py-12 sm:py-16 px-4">
-        <div className="surface-gradient grid gap-6 rounded-2xl sm:rounded-3xl border p-6 sm:p-12 lg:grid-cols-3">
+      <section className="w-full px-4 py-12 sm:py-16">
+        <div className="surface-gradient grid gap-6 rounded-2xl border p-6 sm:rounded-3xl sm:p-12 lg:grid-cols-3">
           {VALUES.map((v) => (
             <div key={v.title}>
-              <v.icon className="size-5 sm:size-6 text-primary" aria-hidden="true" />
-              <h3 className="mt-2.5 text-sm sm:text-base font-semibold">{v.title}</h3>
-              <p className="mt-1 text-xs sm:text-sm text-muted-foreground">{v.body}</p>
+              <v.icon className="size-5 text-primary sm:size-6" aria-hidden="true" />
+              <h3 className="mt-2.5 text-sm font-semibold sm:text-base">{v.title}</h3>
+              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{v.body}</p>
             </div>
           ))}
         </div>
