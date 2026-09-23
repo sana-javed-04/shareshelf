@@ -215,8 +215,8 @@ function BrowsePage() {
   ].filter(Boolean).length;
 
   const filterPanel = (
-    <div className="space-y-5 rounded-2xl border bg-card p-4 sm:p-5 shadow-soft">
-      <div className="space-y-2">
+    <div className="space-y-4 rounded-xl border bg-card p-3.5 sm:p-5 shadow-soft">
+      <div className="space-y-1.5">
         <Label htmlFor="filter-type">Listing type</Label>
         <Select value={filters.listing_type} onValueChange={(v) => update("listing_type", v)}>
           <SelectTrigger id="filter-type">
@@ -233,7 +233,7 @@ function BrowsePage() {
         </Select>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <Label htmlFor="filter-category">Category</Label>
         <Select value={filters.category} onValueChange={(v) => update("category", v)}>
           <SelectTrigger id="filter-category">
@@ -250,7 +250,7 @@ function BrowsePage() {
         </Select>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <Label htmlFor="filter-condition">Condition</Label>
         <Select value={filters.item_condition} onValueChange={(v) => update("item_condition", v)}>
           <SelectTrigger id="filter-condition">
@@ -339,7 +339,7 @@ function BrowsePage() {
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="filter-price">
           Max price {filters.maxPrice > 0 ? `· Rs ${filters.maxPrice.toLocaleString()}` : "· any"}
         </Label>
@@ -353,12 +353,13 @@ function BrowsePage() {
         />
       </div>
 
-      <fieldset className="space-y-3">
-        <legend className="text-sm font-medium">Distance from your area</legend>
-        <div className="flex flex-wrap gap-2">
+      <fieldset className="space-y-2">
+        <legend className="text-xs sm:text-sm font-medium">Distance from area</legend>
+        <div className="flex flex-wrap gap-1.5">
           <Button
             type="button"
             size="sm"
+            className="h-7 text-xs"
             variant={filters.radius === 0 ? "default" : "secondary"}
             onClick={() => update("radius", 0)}
           >
@@ -369,6 +370,7 @@ function BrowsePage() {
               key={r}
               type="button"
               size="sm"
+              className="h-7 text-xs"
               variant={filters.radius === r ? "default" : "secondary"}
               onClick={() => update("radius", r)}
             >
@@ -381,7 +383,7 @@ function BrowsePage() {
       <Button
         type="button"
         variant="ghost"
-        className="w-full text-xs sm:text-sm"
+        className="w-full text-xs"
         onClick={() => {
           setFilters({ ...INITIAL, area: user?.area_name ?? "" });
           if (user?.latitude != null && user?.longitude != null) {
@@ -390,28 +392,28 @@ function BrowsePage() {
           setPage(1);
         }}
       >
-        <X className="mr-2 size-4" aria-hidden="true" />
+        <X className="mr-1.5 size-3.5" aria-hidden="true" />
         Clear filters
       </Button>
     </div>
   );
 
   return (
-    <SiteLayout wide className="w-full max-w-full overflow-x-hidden px-3 sm:px-6">
+    <SiteLayout wide className="w-full">
       <PageHeader
         title="Browse the shelf"
         description="Everything neighbours nearby are renting out, giving away or selling."
       />
 
       {/* Control Bar: Search + Sort + View Mode + Filter Toggle */}
-      <div className="mb-6 flex flex-col gap-2.5 lg:flex-row lg:items-center">
+      <div className="mb-4 flex flex-col gap-2 lg:flex-row lg:items-center">
         <div className="relative w-full flex-1">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
           />
           <Input
-            className="w-full pl-9 text-sm"
+            className="w-full pl-9 text-xs sm:text-sm h-9"
             placeholder="Search items, e.g. drill, textbook, tent…"
             value={filters.q}
             maxLength={120}
@@ -420,14 +422,14 @@ function BrowsePage() {
           />
         </div>
 
-        <div className="flex w-full items-center justify-between gap-2 lg:w-auto lg:justify-end">
+        <div className="flex w-full items-center justify-between gap-1.5 lg:w-auto lg:justify-end">
           <Select value={filters.sort} onValueChange={(v) => update("sort", v as Filters["sort"])}>
-            <SelectTrigger className="flex-1 sm:w-44 text-xs sm:text-sm" aria-label="Sort listings">
+            <SelectTrigger className="flex-1 sm:w-44 text-xs h-9" aria-label="Sort listings">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {SORTS.map((s) => (
-                <SelectItem key={s.value} value={s.value} className="text-xs sm:text-sm">
+                <SelectItem key={s.value} value={s.value} className="text-xs">
                   {s.label}
                 </SelectItem>
               ))}
@@ -448,13 +450,13 @@ function BrowsePage() {
               <Button
                 key={key}
                 size="icon"
-                className="h-8 w-8 sm:h-9 sm:w-9"
+                className="h-7 w-7 sm:h-8 sm:w-8"
                 variant={view === key ? "secondary" : "ghost"}
                 aria-label={label}
                 aria-pressed={view === key}
                 onClick={() => setView(key)}
               >
-                <Icon className="size-4" aria-hidden="true" />
+                <Icon className="size-3.5" aria-hidden="true" />
               </Button>
             ))}
           </div>
@@ -462,22 +464,25 @@ function BrowsePage() {
           <Button
             variant="secondary"
             size="sm"
-            className="shrink-0 text-xs sm:text-sm h-8 sm:h-9 lg:hidden"
+            className="shrink-0 text-xs h-8 sm:h-9 lg:hidden px-2.5"
             onClick={() => setShowFilters((s) => !s)}
           >
-            <SlidersHorizontal className="mr-1.5 size-3.5" aria-hidden="true" />
+            <SlidersHorizontal className="mr-1 size-3" aria-hidden="true" />
             Filters{activeCount ? ` (${activeCount})` : ""}
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
         <aside className={showFilters ? "block" : "hidden lg:block"} aria-label="Filters">
           {filterPanel}
         </aside>
 
         <div className="w-full min-w-0">
-          <p className="mb-4 text-xs sm:text-sm text-muted-foreground" aria-live="polite">
+          <p
+            className="mb-3 text-[11px] sm:text-xs text-muted-foreground px-0.5"
+            aria-live="polite"
+          >
             {isLoading ? "Loading listings…" : `${total} listing${total === 1 ? "" : "s"} found`}
             {isFetching && !isLoading ? " · updating…" : ""}
           </p>
@@ -490,6 +495,7 @@ function BrowsePage() {
               description="Try widening the distance, clearing the price cap, or searching a different keyword."
               action={
                 <Button
+                  size="sm"
                   onClick={() => {
                     setFilters({ ...INITIAL, area: user?.area_name ?? "" });
                     if (user?.latitude != null && user?.longitude != null) {
@@ -503,15 +509,14 @@ function BrowsePage() {
               }
             />
           ) : view === "list" ? (
-            /* List View: 1-1 item per row */
-            <div className="flex flex-col space-y-3 sm:space-y-4">
+            <div className="flex flex-col space-y-2.5 sm:space-y-4">
               {results.map((item) => (
                 <ItemCard key={item.id} item={item} view="list" />
               ))}
             </div>
           ) : (
-            /* Grid View: Mobile par 2 items per row (`grid-cols-2`), Desktop par 3 (`lg:grid-cols-3`) */
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3">
+            /* 2 columns on mobile with a compact gap-2 so cards expand to the screen edges */
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-3">
               {results.map((item) => (
                 <ItemCard key={item.id} item={item} />
               ))}
@@ -531,7 +536,7 @@ function BrowsePage() {
               >
                 Previous
               </Button>
-              <span className="text-xs sm:text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 Page {page} of {totalPages}
               </span>
               <Button

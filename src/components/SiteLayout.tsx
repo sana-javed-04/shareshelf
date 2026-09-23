@@ -21,9 +21,12 @@ export function SiteLayout({
         Skip to content
       </a>
       <Navbar />
-      <main id="main" className={cn("flex-1", className)}>
+      <main id="main" className={cn("flex-1 w-full overflow-x-hidden", className)}>
         <div
-          className={cn("mx-auto w-full px-4 py-10 sm:px-6", wide ? "max-w-[110rem]" : "max-w-7xl")}
+          className={cn(
+            "mx-auto w-full px-2.5 py-6 sm:px-6 sm:py-10",
+            wide ? "max-w-[110rem]" : "max-w-7xl",
+          )}
         >
           {children}
         </div>
@@ -43,10 +46,12 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between px-0.5">
       <div>
-        <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
-        {description && <p className="mt-2 max-w-2xl text-muted-foreground">{description}</p>}
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-4xl">{title}</h1>
+        {description && (
+          <p className="mt-1 text-xs text-muted-foreground sm:text-base">{description}</p>
+        )}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>
