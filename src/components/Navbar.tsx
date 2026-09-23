@@ -63,7 +63,7 @@ export function Navbar() {
     refetchInterval: 15000,
   });
 
-  // Admin reports to track latest report creation timestamp
+  // Admin reports
   const { data: adminReports } = useQuery<Report[]>({
     queryKey: ["admin", "reports"],
     queryFn: adminService.reports,
@@ -71,7 +71,6 @@ export function Navbar() {
     refetchInterval: 15000,
   });
 
-  // Unread logic
   const [hasUnseenAdminReports, setHasUnseenAdminReports] = useState(false);
 
   useEffect(() => {
@@ -111,34 +110,36 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/85 backdrop-blur-lg">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/85 backdrop-blur-lg">
       <nav
         aria-label="Main"
-        className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6"
+        className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 sm:px-6"
       >
-        <Link to="/" aria-label="ShareShelf home" className="shrink-0">
-          <Logo />
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/" aria-label="ShareShelf home" className="shrink-0">
+            <Logo />
+          </Link>
 
-        {/* Desktop Navigation */}
-        <ul className="ml-4 hidden items-center gap-1 md:flex">
-          {PUBLIC_LINKS.map((link) => (
-            <li key={link.to}>
-              <Link
-                to={link.to}
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
-                  pathname === link.to && "text-foreground",
-                )}
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+          {/* Desktop Public Navigation */}
+          <ul className="hidden items-center gap-1 md:flex">
+            {PUBLIC_LINKS.map((link) => (
+              <li key={link.to}>
+                <Link
+                  to={link.to}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+                    pathname === link.to && "text-foreground",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         {/* Right side controls */}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
 
           {user ? (
@@ -150,13 +151,13 @@ export function Navbar() {
                 </Link>
               </Button>
 
-              {/* Desktop User Avatar Dropdown */}
+              {/* Profile Avatar Dropdown (Mobile + Desktop dono par yehi profile menu rahega) */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="secondary"
                     size="icon"
-                    className="relative rounded-full font-bold text-xs"
+                    className="relative rounded-full font-bold text-xs ring-1 ring-border"
                     aria-label="Account menu"
                   >
                     <span>{user.username.slice(0, 2).toUpperCase()}</span>
@@ -270,9 +271,9 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer (Sirf Public links aur action buttons, no duplicates) */}
       {open && (
-        <div className="border-b bg-background/95 px-4 pb-5 pt-2 backdrop-blur-lg md:hidden">
+        <div className="border-b bg-background/95 px-4 pb-4 pt-2 backdrop-blur-lg md:hidden">
           <ul className="flex flex-col space-y-1">
             {PUBLIC_LINKS.map((link) => (
               <li key={link.to}>
@@ -280,7 +281,7 @@ export function Navbar() {
                   to={link.to}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+                    "block rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
                     pathname === link.to && "bg-secondary text-foreground",
                   )}
                 >
@@ -290,70 +291,13 @@ export function Navbar() {
             ))}
           </ul>
 
-          <div className="mt-4 border-t pt-4">
+          <div className="mt-3 border-t pt-3">
             {user ? (
-              <div className="flex flex-col space-y-2">
-                <div className="px-3 py-1 text-sm font-semibold text-foreground">
-                  Signed in as <span className="text-primary">{user.username}</span>
-                </div>
-                <Button asChild className="w-full justify-start" size="sm">
-                  <Link to="/post-item" onClick={() => setOpen(false)}>
-                    <Plus className="mr-2 size-4" /> Post an item
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full justify-start" size="sm">
-                  <Link to="/dashboard" onClick={() => setOpen(false)}>
-                    <LayoutDashboard className="mr-2 size-4" /> Dashboard
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full justify-start" size="sm">
-                  <Link
-                    to="/transactions"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="flex items-center">
-                      <Repeat className="mr-2 size-4" /> Transactions
-                    </span>
-                    {pendingRequests > 0 && (
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-                        {pendingRequests} new
-                      </span>
-                    )}
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full justify-start" size="sm">
-                  <Link
-                    to="/chat"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="flex items-center">
-                      <MessageSquare className="mr-2 size-4" /> Messages
-                    </span>
-                    {unreadMessages > 0 && (
-                      <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
-                        {unreadMessages}
-                      </span>
-                    )}
-                  </Link>
-                </Button>
-                {isAdmin && (
-                  <Button asChild variant="outline" className="w-full justify-start" size="sm">
-                    <Link to="/admin" onClick={() => setOpen(false)}>
-                      <Shield className="mr-2 size-4 text-primary" /> Admin Panel
-                    </Link>
-                  </Button>
-                )}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="mr-2 size-4" /> Sign out
-                </Button>
-              </div>
+              <Button asChild className="w-full justify-center" size="sm">
+                <Link to="/post-item" onClick={() => setOpen(false)}>
+                  <Plus className="mr-2 size-4" /> Post an item
+                </Link>
+              </Button>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 <Button asChild variant="outline" size="sm">
