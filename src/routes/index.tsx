@@ -103,7 +103,7 @@ function Home() {
 
   return (
     <SiteLayout className="pt-0">
-      <section className="relative -mx-4 -mt-10 overflow-hidden px-4 pb-20 pt-16 sm:-mx-6 sm:px-6 sm:pt-24">
+      <section className="relative -mx-4 overflow-hidden px-4 pb-16 pt-8 sm:-mx-6 sm:px-6 sm:pt-20">
         <div className="hero-glow pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <motion.div

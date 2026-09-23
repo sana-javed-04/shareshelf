@@ -42,6 +42,11 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  // Close mobile drawer when route changes
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   // User notifications
   const { data: stats } = useQuery({
     queryKey: ["user", "stats"],
@@ -66,7 +71,7 @@ export function Navbar() {
     refetchInterval: 15000,
   });
 
-  // Unread logic: check if there are pending reports created AFTER last visit to /admin
+  // Unread logic
   const [hasUnseenAdminReports, setHasUnseenAdminReports] = useState(false);
 
   useEffect(() => {
@@ -84,11 +89,9 @@ export function Navbar() {
     const lastSeenTime = Number(localStorage.getItem("admin_reports_last_seen") || "0");
     const latestPendingTime = Math.max(...pendingList.map((r) => new Date(r.created_at).getTime()));
 
-    // Agar nayi pending report ka waqt last visit se aage ka hai toh hi dot aayega
     setHasUnseenAdminReports(latestPendingTime > lastSeenTime);
   }, [isAdmin, adminReports, pathname]);
 
-  // Agar user currently /admin page par hai toh foran seen mark kar dein
   useEffect(() => {
     if (pathname === "/admin" && isAdmin) {
       localStorage.setItem("admin_reports_last_seen", String(Date.now()));
@@ -117,6 +120,7 @@ export function Navbar() {
           <Logo />
         </Link>
 
+        {/* Desktop Navigation */}
         <ul className="ml-4 hidden items-center gap-1 md:flex">
           {PUBLIC_LINKS.map((link) => (
             <li key={link.to}>
@@ -133,6 +137,7 @@ export function Navbar() {
           ))}
         </ul>
 
+        {/* Right side controls */}
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
 
@@ -145,6 +150,7 @@ export function Navbar() {
                 </Link>
               </Button>
 
+              {/* Desktop User Avatar Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -155,7 +161,6 @@ export function Navbar() {
                   >
                     <span>{user.username.slice(0, 2).toUpperCase()}</span>
 
-                    {/* AD avatar notification dot: sirf tab jab UNSEEN report ho */}
                     {(hasUnseenAdminReports || totalUserAlerts > 0) && (
                       <span className="absolute -top-0.5 -right-0.5 flex size-2.5">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
@@ -251,16 +256,121 @@ export function Navbar() {
               </Button>
             </div>
           )}
+
+          {/* Mobile Hamburger Button */}
           <Button
             variant="ghost"
             size="icon"
             className="md:hidden"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpen((prev) => !prev)}
+            aria-label="Toggle navigation menu"
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </Button>
         </div>
       </nav>
+
+      {/* Mobile Drawer */}
+      {open && (
+        <div className="border-b bg-background/95 px-4 pb-5 pt-2 backdrop-blur-lg md:hidden">
+          <ul className="flex flex-col space-y-1">
+            {PUBLIC_LINKS.map((link) => (
+              <li key={link.to}>
+                <Link
+                  to={link.to}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "block rounded-lg px-3 py-2 text-base font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+                    pathname === link.to && "bg-secondary text-foreground",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-4 border-t pt-4">
+            {user ? (
+              <div className="flex flex-col space-y-2">
+                <div className="px-3 py-1 text-sm font-semibold text-foreground">
+                  Signed in as <span className="text-primary">{user.username}</span>
+                </div>
+                <Button asChild className="w-full justify-start" size="sm">
+                  <Link to="/post-item" onClick={() => setOpen(false)}>
+                    <Plus className="mr-2 size-4" /> Post an item
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start" size="sm">
+                  <Link to="/dashboard" onClick={() => setOpen(false)}>
+                    <LayoutDashboard className="mr-2 size-4" /> Dashboard
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start" size="sm">
+                  <Link
+                    to="/transactions"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="flex items-center">
+                      <Repeat className="mr-2 size-4" /> Transactions
+                    </span>
+                    {pendingRequests > 0 && (
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                        {pendingRequests} new
+                      </span>
+                    )}
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start" size="sm">
+                  <Link
+                    to="/chat"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="flex items-center">
+                      <MessageSquare className="mr-2 size-4" /> Messages
+                    </span>
+                    {unreadMessages > 0 && (
+                      <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
+                        {unreadMessages}
+                      </span>
+                    )}
+                  </Link>
+                </Button>
+                {isAdmin && (
+                  <Button asChild variant="outline" className="w-full justify-start" size="sm">
+                    <Link to="/admin" onClick={() => setOpen(false)}>
+                      <Shield className="mr-2 size-4 text-primary" /> Admin Panel
+                    </Link>
+                  </Button>
+                )}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="mr-2 size-4" /> Sign out
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/login" onClick={() => setOpen(false)}>
+                    Sign in
+                  </Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link to="/register" onClick={() => setOpen(false)}>
+                    Join ShareShelf
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
